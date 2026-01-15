@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/x-icon" href="{{ asset('images/icon.ico') }}">    <title>Farmácia Pai e Filha</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/icon.ico') }}">    <title>Farmácia Pai e Filhos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -16,7 +16,7 @@
         
         <div class="container mx-auto px-4 py-4 flex flex-wrap items-center justify-between">
             <div class="text-2xl font-bold text-blue-700 flex items-center gap-2">
-                <i class="fas fa-plus-square"></i> FARMÁCIA PAI E FILHA
+                <i class="fas fa-plus-square"></i> FARMÁCIA PAI E FILHOS
             </div>
 
             <div class="w-full md:w-1/2 order-3 md:order-2 mt-4 md:mt-0">
