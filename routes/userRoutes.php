@@ -1,8 +1,8 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\createUserController;
-use App\Http\Controllers\updateUserController;
-use App\Http\Controllers\retrieveUserController;
+use App\Http\Controllers\Auth\User\useCases\CreateUser\CreateUserController;
+use App\Http\Controllers\Auth\User\useCases\RetrieveUser\RetrieveUserController;
+use App\Http\Controllers\Auth\User\useCases\UpdateUser\UpdateUserController;
 
 Route::post('/create-user', [createUserController::class, 'createUser']);
 Route::put('/update-user/{$id}', [updateUserController::class, 'updateUser']);
