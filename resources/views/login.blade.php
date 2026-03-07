@@ -20,8 +20,13 @@
         </div>
 
         <div class="p-8">
-            <form action="{{ route('login/auth') }}" method="POST"> @csrf
-
+            <form action="{{ route('login/auth') }}" method="POST"> 
+                @csrf
+                @error('email')
+                    <div class="text-red-500 text-sm mb-2">
+                        {{ $message }}
+                    </div>
+                @enderror
                 <div class="mb-6">
                     <label for="email" class="block text-gray-600 text-sm font-medium mb-2">E-mail</label>
                     <div class="relative">

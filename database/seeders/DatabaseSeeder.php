@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
             'name' => env('ADMIN_NAME'),
             'email' => env('ADMIN_EMAIL'),
             'idRoles' => Role::where('roles', 'admin')->first()->id,
-            'password' => Hash::make(env('ADMIN_PASSWORD')),
+            'password' => env('ADMIN_PASSWORD'),
         ]);
     }
 }

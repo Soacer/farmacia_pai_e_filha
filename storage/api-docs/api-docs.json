@@ -21,6 +21,47 @@
                 ],
                 "summary": "Cadastrar novo usuário",
                 "operationId": "5e62d710ed0852486485461d72017cc6",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Nome do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "Email do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "email"
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "description": "Senha do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "password"
+                        }
+                    },
+                    {
+                        "name": "idRoles",
+                        "in": "query",
+                        "description": "Role do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "foreignId",
+                            "format": "number"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Usuário criado com sucesso"

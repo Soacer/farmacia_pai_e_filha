@@ -1,7 +1,13 @@
 <?php
 
-use App\Http\Controllers\Auth\loginController;
+use App\Http\Controllers\Auth\User\useCases\AuthenticateUser\AuthenticateUserController;
+use App\Http\Controllers\Auth\User\Views\AuthenticateUser\AuthenticateUserViewController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/auth', [loginController::class, 'auth'])->name('login/auth');
-Route::get('/cadastro', [loginController::class, 'cadastro'])->name('login/cadastro');
+//GET
+Route::get('/auth', [AuthenticateUserViewController::class, 'auth'])->name('login');
+Route::get('/cadastro', [AuthenticateUserViewController::class, 'cadastro'])->name('login/cadastro');
+Route::get('/dashboard', [AuthenticateUserViewController::class, 'dashboard'])->middleware('auth')->name('dashboard');
+
+//POST 
+Route::post('/auth', [AuthenticateUserController::class, 'authenticateUser'])->name('login/auth');
