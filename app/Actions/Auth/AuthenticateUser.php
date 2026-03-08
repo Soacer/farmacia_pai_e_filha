@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Auth\User\useCases\AuthenticateUser;
-
+namespace App\Actions\Auth;
 use Illuminate\Support\Facades\Auth;
 
-class AuthenticateUserUseCase
+class AuthenticateUser
 {
     /**
      * Create a new class instance.
