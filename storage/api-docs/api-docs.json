@@ -14,69 +14,140 @@
                 }
             ]
         },
-        "/users/create-user": {
+        "/login/auth": {
+            "get": {
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Exibe o formulário de login",
+                "operationId": "6eb587d0dcfdcb28c0e0b772f28a1737",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
             "post": {
                 "tags": [
-                    "users"
+                    "Autenticação"
                 ],
-                "summary": "Cadastrar novo usuário",
-                "operationId": "5e62d710ed0852486485461d72017cc6",
-                "parameters": [
-                    {
-                        "name": "name",
-                        "in": "query",
-                        "description": "Nome do usuário",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "email",
-                        "in": "query",
-                        "description": "Email do usuário",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "email"
-                        }
-                    },
-                    {
-                        "name": "password",
-                        "in": "query",
-                        "description": "Senha do usuário",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "password"
-                        }
-                    },
-                    {
-                        "name": "idRoles",
-                        "in": "query",
-                        "description": "Role do usuário",
-                        "required": true,
-                        "schema": {
-                            "type": "foreignId",
-                            "format": "number"
-                        }
-                    }
-                ],
+                "summary": "Realiza a autenticação",
+                "operationId": "e5ac035140b836a2d55659ee0d58df0d",
                 "responses": {
-                    "201": {
-                        "description": "Usuário criado com sucesso"
-                    },
-                    "422": {
-                        "description": "Dados inválidos"
+                    "302": {
+                        "description": "Redirecionamento"
+                    }
+                }
+            }
+        },
+        "/user/dashboard": {
+            "get": {
+                "tags": [
+                    "Painel"
+                ],
+                "summary": "Exibe o Dashboard",
+                "operationId": "ad585d7d693d6694b71c6084a6277f53",
+                "responses": {
+                    "200": {
+                        "description": "Dados do Dashboard carregados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     },
+    "components": {
+        "schemas": {
+            "Customer": {
+                "title": "Cliente/Funcionário",
+                "description": "Estrutura de dados para cadastro de pessoas",
+                "properties": {
+                    "idCustomers": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Maria Souza"
+                    },
+                    "cpf": {
+                        "type": "string",
+                        "example": "000.000.000-00"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "71999998888"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "maria@farmacia.com"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "Rua Principal, 123"
+                    }
+                },
+                "type": "object"
+            },
+            "Role": {
+                "title": "Permissão",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "roles": {
+                        "type": "string",
+                        "example": "employee"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "Usuário",
+                "description": "Modelo de usuário para autenticação",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Administrador"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "admin@admin.com"
+                    },
+                    "idRoles": {
+                        "description": "ID do cargo",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "isActive": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
     "tags": [
         {
-            "name": "users",
-            "description": "users"
+            "name": "Autenticação",
+            "description": "Endpoints de acesso"
+        },
+        {
+            "name": "Painel",
+            "description": "Painel"
         }
     ]
 }
