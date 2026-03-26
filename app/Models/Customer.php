@@ -27,15 +27,14 @@ class Customer extends Model
     protected $table = 'customers';
 
     // Como sua chave primária é 'idCustomers', precisamos avisar o Laravel
-    protected $primaryKey = 'idCustomers';
+    protected $primaryKey = 'id';
 
     // Campos que podem ser preenchidos em massa (Mass Assignment)
     protected $fillable = [
         'name',
         'cpf',
         'phone',
-        'email',
-        'address',
+        'idUsers'
     ];
 
     // O Laravel já gerencia created_at e updated_at automaticamente, 

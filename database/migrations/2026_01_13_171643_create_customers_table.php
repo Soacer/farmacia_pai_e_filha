@@ -16,8 +16,15 @@ return new class extends Migration
             $table->string('name');
             $table->string('cpf')->unique()->nullable();
             $table->string('phone')->nullable();
-            $table->string('email')->unique()->nullable();
-            $table->string('password');
+
+            //Chave Estrangeira
+            $table->unsignedBigInteger('idUsers');
+            $table->foreign('idUsers')
+              ->references('id')
+              ->on('users')
+              ->onDelete('cascade');
+              
+            //Time Stamps
             $table->timestamps();
         });
     }

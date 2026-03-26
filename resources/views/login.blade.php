@@ -75,7 +75,7 @@
 
             <div class="text-center">
                 <p class="text-sm text-gray-600">Não tem uma conta?</p>
-                <a href="{{ route('login/cadastro') }}" class="text-blue-700 font-bold hover:underline">
+                <a href="{{ route('create_customer') }}" class="text-blue-700 font-bold hover:underline">
                     Crie sua conta agora
                 </a>
             </div>
