@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
 
+#[OA\Info(title: "Farmácia Pai e Filha API", version: "1.0.0")]
 class UserController extends Controller
 {
     //

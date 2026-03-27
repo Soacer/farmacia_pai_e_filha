@@ -25,7 +25,7 @@
                 @endif
                 
                 {{-- Admin e Funcionário (1 e 2) veem Medicamentos --}}
-                <li><a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-blue-800 rounded-lg">Medicamentos</a></li>
+                <li><a href="{{ route('create_product') }}" class="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-blue-800 rounded-lg">Medicamentos</a></li>
             </ul>
         </details>
     </nav>

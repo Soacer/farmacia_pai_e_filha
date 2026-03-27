@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
+            $table->string('class');
+            $table->string('subclass');
+            $table->string('isActive');
             $table->timestamps();
         });
     }
