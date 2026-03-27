@@ -5,38 +5,72 @@
         </h1>
     </div>
 
-    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        <a href="{{ url('/dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-blue-800 rounded-lg hover:bg-blue-700 transition-colors">
-            <i class="fa-solid fa-house"></i> <span class="font-medium">Home</span>
+    <nav class="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
+        
+        <a href="{{ url('/dashboard') }}" 
+           class="flex items-center gap-3 px-4 py-3 {{ Request::is('dashboard') ? 'bg-blue-700' : 'hover:bg-blue-800' }} rounded-lg transition-colors">
+            <i class="fa-solid fa-house text-blue-300"></i> 
+            <span class="font-medium">Home</span>
         </a>
 
-        <details class="group">
-            <summary class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-blue-800 cursor-pointer list-none">
+        <a href="{{ route('select_all_products') }}" 
+           class="flex items-center gap-3 px-4 py-3 {{ Request::is('product/stock*') ? 'bg-blue-700' : 'hover:bg-blue-800' }} rounded-lg transition-colors border border-blue-800/50">
+            <i class="fa-solid fa-boxes-stacked text-blue-300"></i> 
+            <span class="font-medium">Controle de Estoque</span>
+        </a>
+
+        <hr class="border-blue-800 my-4 mx-2">
+
+        <details class="group" {{ Request::is('supplier*') || Request::is('product/product-form*') ? 'open' : '' }}>
+            <summary class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-blue-800 cursor-pointer list-none transition-colors">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-boxes-stacked"></i> <span class="font-medium">Cadastros</span>
+                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> 
+                    <span class="font-medium">Cadastros</span>
                 </div>
-                <i class="fa-solid fa-chevron-down text-sm transition-transform group-open:rotate-180"></i>
+                <i class="fa-solid fa-chevron-down text-[10px] transition-transform group-open:rotate-180 text-blue-400"></i>
             </summary>
 
             <ul class="mt-2 ml-4 pl-4 border-l-2 border-blue-700 space-y-1">
                 {{-- Apenas Admin (ID 1) vê Funcionários --}}
-                @if(auth()->user()->idRoles == 1)
-                <li><a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-blue-800 rounded-lg">Funcionários</a></li>
+                @if (auth()->user()->idRoles == 1)
+                    <li>
+                        <a href="#" class="block px-4 py-2 text-sm text-blue-200 hover:text-white hover:bg-blue-800 rounded-lg transition">
+                            Funcionários
+                        </a>
+                    </li>
                 @endif
-                
-                {{-- Admin e Funcionário (1 e 2) veem Medicamentos --}}
-                <li><a href="{{ route('create_product') }}" class="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-blue-800 rounded-lg">Medicamentos</a></li>
+
+                <li>
+                    <a href="{{ route('create_product') }}" 
+                       class="block px-4 py-2 text-sm {{ Request::is('product/product-form*') ? 'text-white bg-blue-800/50' : 'text-blue-200 hover:text-white hover:bg-blue-800' }} rounded-lg transition">
+                        Medicamentos
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('create_supplier') }}" 
+                       class="block px-4 py-2 text-sm {{ Request::is('supplier*') ? 'text-white bg-blue-800/50' : 'text-blue-200 hover:text-white hover:bg-blue-800' }} rounded-lg transition">
+                        Fornecedores
+                    </a>
+                </li>
             </ul>
         </details>
     </nav>
 
-    <div class="p-4 border-t border-blue-800 text-sm">
-        <p class="text-blue-200">Logado como:</p>
-        <p class="font-bold truncate">{{ auth()->user()->name }}</p>
-        
-        <form action="{{ route('logout') }}" method="POST" class="mt-4">
+    <div class="p-4 border-t border-blue-800 bg-blue-950/50">
+        <div class="flex items-center gap-3 mb-4 px-2">
+            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">
+                {{ substr(auth()->user()->name, 0, 1) }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs text-blue-300 leading-none mb-1">Logado como:</p>
+                <p class="text-sm font-bold truncate">{{ auth()->user()->name }}</p>
+            </div>
+        </div>
+
+        <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium">
+            <button type="submit" 
+                class="w-full flex items-center justify-center gap-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95">
                 <i class="fa-solid fa-right-from-bracket"></i> Sair
             </button>
         </form>

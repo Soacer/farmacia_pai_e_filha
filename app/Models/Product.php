@@ -4,25 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: "Product",
-    title: "Produto",
-    description: "Modelo de representação de um medicamento ou item de conveniência",
+    schema: 'Product',
+    title: 'Produto',
+    description: 'Modelo de representação de um medicamento ou item de conveniência',
     properties: [
-        new OA\Property(property: "id", type: "integer", example: 1),
-        new OA\Property(property: "idCategory", type: "integer", example: 5),
-        new OA\Property(property: "name", type: "string", example: "Paracetamol 500mg"),
-        new OA\Property(property: "description", type: "string", example: "Analgésico e antitérmico para dores leves"),
-        new OA\Property(property: "barcode", type: "string", example: "7891234567890"),
-        new OA\Property(property: "active_principle", type: "string", example: "Paracetamol"),
-        new OA\Property(property: "isActive", type: "boolean", example: false),
-        new OA\Property(property: "requires_prescription", type: "boolean", example: false),
-        new OA\Property(property: "price", type: "number", format: "float", example: 15.50),
-        new OA\Property(property: "min_stock_alert", type: "integer", example: 10)
+        new OA\Property(property: 'id', type: 'integer', example: 1),
+        new OA\Property(property: 'idCategory', type: 'integer', example: 5),
+        new OA\Property(property: 'name', type: 'string', example: 'Paracetamol 500mg'),
+        new OA\Property(property: 'description', type: 'string', example: 'Analgésico e antitérmico para dores leves'),
+        new OA\Property(property: 'barcode', type: 'string', example: '7891234567890'),
+        new OA\Property(property: 'active_principle', type: 'string', example: 'Paracetamol'),
+        new OA\Property(property: 'isActive', type: 'boolean', example: false),
+        new OA\Property(property: 'requires_prescription', type: 'boolean', example: false),
+        new OA\Property(property: 'price', type: 'number', format: 'float', example: 15.50),
+        new OA\Property(property: 'min_stock_alert', type: 'integer', example: 10),
     ]
 )]
 class Product extends Model
@@ -37,10 +37,10 @@ class Product extends Model
         'description',
         'barcode',
         'active_principle',
+        'price',
+        'min_stock_alert',
         'isActive',
         'requires_prescription',
-        'price',
-        'min_stock_alert'
     ];
 
     /**
@@ -62,7 +62,11 @@ class Product extends Model
      */
     public function category(): BelongsTo
     {
-        // Aqui passamos a FK 'idCategory' e a PK da tabela pai 'idcategory'
-        return $this->belongsTo(Category::class, 'idCategory', 'idcategory');
+        return $this->belongsTo(Category::class, 'idCategory', 'id');
+    }
+
+    public function batch()
+    {
+        return $this->hasMany(Batch::class, 'idProducts');
     }
 }

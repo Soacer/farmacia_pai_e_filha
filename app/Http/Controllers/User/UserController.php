@@ -18,22 +18,27 @@ class UserController extends Controller
     #[OA\Post(
         path: '/login/cadastro',
         summary: 'Registra um novo cliente no sistema',
+        description: 'Cria simultaneamente um registro na tabela Users e na tabela Customers dentro de uma transação.',
         tags: ['Autenticação'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['name', 'email', 'password', 'password_confirmation'],
+                required: ['name', 'email', 'password', 'password_confirmation', 'cpf', 'phone', 'birth_date'],
                 properties: [
                     new OA\Property(property: 'name', type: 'string', example: 'Alisson Rodrigo'),
                     new OA\Property(property: 'email', type: 'string', format: 'email', example: 'alisson@email.com'),
                     new OA\Property(property: 'password', type: 'string', format: 'password', example: '12345678'),
                     new OA\Property(property: 'password_confirmation', type: 'string', format: 'password', example: '12345678'),
+                    new OA\Property(property: 'cpf', type: 'string', example: '123.456.789-00'),
+                    new OA\Property(property: 'phone', type: 'string', example: '71988887777'),
+                    new OA\Property(property: 'birth_date', type: 'string', format: 'date', example: '1998-03-14'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 302, description: 'Usuário criado e redirecionado para a home'),
-            new OA\Response(response: 422, description: 'Erro de validação nos dados enviados'),
+            new OA\Response(response: 302, description: 'Usuário criado e redirecionado para o login'),
+            new OA\Response(response: 422, description: 'Erro de validação (CPF duplicado, e-mail inválido, etc.)'),
+            new OA\Response(response: 500, description: 'Erro interno ao processar a transação no banco')
         ]
     )]
     public function createUser(StoreCustomerRequest $request)
@@ -53,6 +58,7 @@ class UserController extends Controller
                     'name' => $request->name,
                     'cpf' => $request->cpf,
                     'phone' => $request->phone,
+                    'birth_date' => $request->birth_date,
                     'idUsers' => $user->id,
                 ]);
 

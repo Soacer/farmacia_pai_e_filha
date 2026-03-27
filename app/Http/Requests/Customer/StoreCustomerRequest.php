@@ -20,11 +20,20 @@ class StoreCustomerRequest extends StoreUserRequest
     {
         $userRules = parent::rules(); // Recebendo as regras de User
         $customerRules = [
-            'cpf' => 'required|string|max:45|unique:customers,cpf',
+            'cpf' => 'required|string|max:14|unique:customers,cpf',
             'phone' => 'required|string|max:45',
+            'birth_date' => 'required|date|before:today',
         ];
 
         return array_merge($userRules, $customerRules);
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'cpf' => preg_replace('/[^0-9]/', '', $this->cpf),
+            'phone' => preg_replace('/[^0-9]/', '', $this->phone),
+        ]);
     }
 
     /*

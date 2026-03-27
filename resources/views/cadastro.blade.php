@@ -87,6 +87,12 @@
                             @enderror
                         </div>
 
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-slate-600 uppercase mb-1">Data de Nascimento</label>
+                            <input type="date" name="birth_date" value="{{ old('birth_date') }}" required
+                                class="w-full px-3 py-2 rounded border border-slate-300 focus:border-blue-500 outline-none text-sm">
+                        </div>
+
                     </div>
                 </div>
 
