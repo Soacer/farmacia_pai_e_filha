@@ -52,6 +52,12 @@ class Customer extends Model
             set: fn (string $value) => preg_replace('/[^0-9]/', '', $value),
         );
     }
+
     // O Laravel já gerencia created_at e updated_at automaticamente,
     // então não precisamos colocá-los no $fillable.
+    public function addresses()
+    {
+        // Retorna uma coleção (array) de endereços
+        return $this->hasMany(Address::class, 'idCustomer');
+    }
 }

@@ -5,73 +5,124 @@ namespace App\Http\Controllers\Supplier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Supplier\StoreSupplierRequest;
 use App\Models\Supplier;
+use App\Models\Address;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
 
 class SupplierController extends Controller
 {
-    //
     #[OA\Get(
         path: '/supplier/supplier-form',
         summary: 'Exibe o formulário de cadastro de fornecedores',
         tags: ['Fornecedores'],
-        responses: [
-            new OA\Response(response: 200, description: 'Visualização do formulário carregada'),
-        ]
+        responses: [new OA\Response(response: 200, description: 'Visualização carregada')]
     )]
     public function showCreateSupplierForm()
     {
-
         return view('supplier.create_supplier');
     }
 
-    #[OA\Post(
-        path: '/supplier/store-supplier', // URL exata: prefixo + rota
-        summary: 'Cadastra ou atualiza um fornecedor',
-        description: 'Utiliza o CNPJ como chave única. Se o CNPJ já existir, os dados serão atualizados via updateOrCreate.',
+    #[OA\Get(
+        path: '/suppliers/list',
+        summary: 'Lista todos os fornecedores cadastrados',
         tags: ['Fornecedores'],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['company_name', 'cnpj', 'email', 'phone'],
-                properties: [
-                    new OA\Property(property: 'company_name', type: 'string', example: 'Distribuidora de Medicamentos Bahia LTDA'),
-                    new OA\Property(property: 'trade_name', type: 'string', example: 'Farma Distribuidora'),
-                    new OA\Property(property: 'cnpj', type: 'string', example: '12.345.678/0001-99'),
-                    new OA\Property(property: 'contact_name', type: 'string', example: 'Sr. João Silva'),
-                    new OA\Property(property: 'phone', type: 'string', example: '7133221100'),
-                    new OA\Property(property: 'state_registration', type: 'string', example: '123456789'),
-                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'contato@farmadistribuidora.com'),
-                ]
-            )
-        ),
-        responses: [
-            new OA\Response(response: 302, description: 'Sucesso: Redireciona de volta com mensagem'),
-            new OA\Response(response: 422, description: 'Erro: Validação falhou (StoreSupplierRequest)'),
-            new OA\Response(response: 500, description: 'Erro: Falha interna no banco de dados')
-        ]
+        responses: [new OA\Response(response: 200, description: 'Lista carregada com sucesso')]
+    )]
+    public function showAllSuppliers()
+    {
+        $suppliers = Supplier::with('addresses')->orderBy('company_name', 'asc')->get();
+        return view('supplier.supplier_list', compact('suppliers'));
+    }
+
+    #[OA\Post(
+        path: '/supplier/store-supplier',
+        summary: 'Cadastra um fornecedor e seu endereço',
+        tags: ['Fornecedores'],
+        responses: [new OA\Response(response: 201, description: 'Fornecedor criado com sucesso')]
     )]
     public function createSupplier(StoreSupplierRequest $request)
     {
         try {
-            Supplier::updateOrCreate(
-                ['cnpj' => $request->cnpj],
-                [
-                    'company_name' => $request->company_name,
-                    'trade_name' => $request->trade_name,
-                    'contact_name' => $request->contact_name,
-                    'phone' => $request->phone,
-                    'state_registration' => $request->state_registration,
-                    'email' => $request->email,
-                    'isActive' => true,
-                ]
-            );
+            return DB::transaction(function () use ($request) {
+                $supplier = Supplier::updateOrCreate(
+                    ['cnpj' => $request->cnpj],
+                    [
+                        'company_name' => $request->company_name,
+                        'trade_name' => $request->trade_name,
+                        'contact_name' => $request->contact_name,
+                        'phone' => $request->phone,
+                        'state_registration' => $request->state_registration,
+                        'email' => $request->email,
+                        'isActive' => true,
+                    ]
+                );
 
-            return redirect()->back()->with('success', 'Fornecedor cadastrado com sucesso!');
+                $supplier->addresses()->create($request->only([
+                    'zip_code', 'street', 'number', 'complement', 'neighborhood', 'city', 'state'
+                ]));
+
+                return redirect()->route('all_suppliers')->with('success', 'Fornecedor cadastrado com sucesso!');
+            });
         } catch (\Exception $e) {
             Log::error('Erro ao cadastrar fornecedor: '.$e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Erro ao salvar.');
+        }
+    }
 
-            return redirect()->back()->withInput()->with('error', 'Erro ao salvar fornecedor.');
+    #[OA\Put(
+        path: '/supplier/update/{id}',
+        summary: 'Atualiza dados cadastrais e endereço do fornecedor',
+        tags: ['Fornecedores'],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [new OA\Response(response: 200, description: 'Dados atualizados com sucesso')]
+    )]
+    public function updateSupplier(Request $request, $id)
+    {
+        try {
+            return DB::transaction(function () use ($request, $id) {
+                $supplier = Supplier::findOrFail($id);
+                
+                // Atualiza Fornecedor
+                $supplier->update($request->only([
+                    'company_name', 'trade_name', 'email', 'phone', 'contact_name', 'state_registration'
+                ]));
+
+                // Atualiza Endereço vinculado
+                if ($request->filled('idAddress')) {
+                    $address = Address::findOrFail($request->idAddress);
+                    $address->update($request->only([
+                        'zip_code', 'street', 'number', 'complement', 'neighborhood', 'city', 'state'
+                    ]));
+                }
+
+                return redirect()->back()->with('success', 'Fornecedor atualizado com sucesso!');
+            });
+        } catch (\Exception $e) {
+            Log::error('Erro ao atualizar fornecedor: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Erro ao processar atualização.');
+        }
+    }
+
+    #[OA\Patch(
+        path: '/supplier/deactivate/{id}',
+        summary: 'Inativa ou reativa um fornecedor (Soft Delete)',
+        tags: ['Fornecedores'],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [new OA\Response(response: 200, description: 'Status alterado com sucesso')]
+    )]
+    public function deactivateSupplier($id)
+    {
+        try {
+            $supplier = Supplier::findOrFail($id);
+            $supplier->isActive = !$supplier->isActive;
+            $supplier->save();
+
+            $msg = $supplier->isActive ? 'reativado' : 'inativado';
+            return redirect()->back()->with('success', "Fornecedor {$msg} com sucesso!");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao alterar status.');
         }
     }
 }

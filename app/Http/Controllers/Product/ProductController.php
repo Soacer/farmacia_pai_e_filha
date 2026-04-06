@@ -12,14 +12,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
 
-#[OA\Info(title: 'Farmácia Pai e Filha API', version: '1.0.0')]
 class ProductController extends Controller
 {
     public function showAllProducts()
     {
         $products = Product::with(['category', 'batch'])->get();
+        // Adicione estas duas linhas:
+        $categories = Category::where('isActive', true)->get();
+        $suppliers = Supplier::where('isActive', true)->get();
 
-        return view('product.product_stock', compact('products'));
+        return view('product.product_stock', compact('products', 'categories', 'suppliers'));
     }
 
     public function showCreateProductForm()
@@ -32,30 +34,44 @@ class ProductController extends Controller
 
     #[OA\Post(
         path: '/create-product',
-        summary: 'Cria ou recupera um produto/medicamento',
-        description: 'Busca a categoria pelo nome da classe/subclasse e registra o produto se ele não existir (baseado no barcode).',
+        summary: 'Cria um produto e opcionalmente fornecedor/lote',
+        description: 'Registra o produto e, se solicitado, cria o fornecedor com endereço e o primeiro lote.',
         tags: ['Products'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['class', 'subclass', 'name', 'price', 'barcode'],
+                required: ['idCategory', 'name', 'price', 'barcode'],
                 properties: [
-                    new OA\Property(property: 'class', type: 'string', example: 'Sistema Nervoso e Dor'),
-                    new OA\Property(property: 'subclass', type: 'string', example: 'Analgésicos e Antitérmicos'),
-                    new OA\Property(property: 'name', type: 'string', example: 'Paracetamol 500mg'),
-                    new OA\Property(property: 'description', type: 'string', example: 'Caixa com 20 comprimidos'),
+                    // Dados do Produto
+                    new OA\Property(property: 'idCategory', type: 'integer', example: 1),
+                    new OA\Property(property: 'name', type: 'string', example: 'Dipirona 500mg'),
                     new OA\Property(property: 'barcode', type: 'string', example: '7891234567890'),
-                    new OA\Property(property: 'active_principle', type: 'string', example: 'Paracetamol'),
-                    new OA\Property(property: 'requires_prescription', type: 'boolean', example: false),
                     new OA\Property(property: 'price', type: 'string', example: '15,50'),
                     new OA\Property(property: 'min_stock_alert', type: 'integer', example: 10),
+
+                    // Toggle de Novo Fornecedor
+                    new OA\Property(property: 'novoFornecedor', type: 'boolean', example: true),
+                    new OA\Property(property: 'cnpj', type: 'string', example: '12345678000199'),
+
+                    // Dados de Endereço (Para Novo Fornecedor)
+                    new OA\Property(property: 'zip_code', type: 'string', example: '41000000'),
+                    new OA\Property(property: 'street', type: 'string', example: 'Avenida Sete de Setembro'),
+                    new OA\Property(property: 'number', type: 'string', example: '100'),
+                    new OA\Property(property: 'neighborhood', type: 'string', example: 'Centro'),
+                    new OA\Property(property: 'city', type: 'string', example: 'Salvador'),
+                    new OA\Property(property: 'state', type: 'string', example: 'BA'),
+
+                    // Dados de Lote (Batch)
+                    new OA\Property(property: 'batch_code', type: 'string', example: 'LOT-2026-X'),
+                    new OA\Property(property: 'quantity', type: 'integer', example: 100),
+                    new OA\Property(property: 'expiration_date', type: 'string', format: 'date', example: '2028-12-31'),
+                    new OA\Property(property: 'cost_price', type: 'string', example: '5,50'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Produto processado com sucesso'),
-            new OA\Response(response: 400, description: 'Erro na validação ou categoria não encontrada'),
-            new OA\Response(response: 500, description: 'Erro interno no servidor'),
+            new OA\Response(response: 200, description: 'Sucesso'),
+            new OA\Response(response: 500, description: 'Erro Interno'),
         ]
     )]
     public function createProduct(Request $request)
@@ -77,6 +93,16 @@ class ProductController extends Controller
                             'isActive' => true,
                         ]
                     );
+
+                    $newSupplier->addresses()->create([
+                        'zip_code' => $request->zip_code,
+                        'street' => $request->street,
+                        'number' => $request->number,
+                        'neighborhood' => $request->neighborhood,
+                        'city' => $request->city ?? 'Salvador',
+                        'state' => $request->state ?? 'BA',
+                    ]);
+
                     $supplierId = $newSupplier->id;
                 }
 
@@ -117,16 +143,121 @@ class ProductController extends Controller
                 ->with('error', 'Não foi possível cadastrar: '.$e->getMessage());
         }
     }
-    /*
-    private function getCategoryId(string $class, string $subclass)
+
+    #[OA\Put(
+        path: '/product/update/{id}',
+        summary: 'Atualiza produto e lote simultaneamente',
+        tags: ['Products'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'idCategory', type: 'integer'),
+                    new OA\Property(property: 'barcode', type: 'string'),
+                    new OA\Property(property: 'active_principle', type: 'string'),
+                    new OA\Property(property: 'price', type: 'string'),
+                    new OA\Property(property: 'batch_code', type: 'string'),
+                    new OA\Property(property: 'quantity_now', type: 'integer'),
+                    new OA\Property(property: 'idSupplier', type: 'integer'),
+                ]
+            )
+        ),
+        responses: [new OA\Response(response: 200, description: 'Sucesso')]
+    )]
+    public function updateProduct(Request $request, $id)
     {
-        dump($class);
-        dd($subclass);
-        $category = Category::where('class', $class)->where('subclass', $subclass)->first();
-        if (!$category) {
-            throw new \Exception("Categoria '{$class} - {$subclass}' não encontrada.");
+        try {
+            $product = Product::findOrFail($id);
+
+            $productData = [
+                'name' => $request->name,
+                'idCategory' => $request->idCategory,
+                'barcode' => $request->barcode,
+                'active_principle' => $request->active_principle,
+                'description' => $request->description,
+                'requires_prescription' => $request->has('requires_prescription'),
+            ];
+
+            if ($request->filled('min_stock_alert')) {
+                $productData['min_stock_alert'] = $request->min_stock_alert;
+            }
+
+            if ($request->filled('price')) {
+                $cleanPrice = str_replace(['.', ','], ['', '.'], $request->price);
+                $productData['price'] = $cleanPrice;
+            }
+
+            $product->update($productData);
+
+            if ($request->filled('idBatch')) {
+                $batch = Batch::findOrFail($request->idBatch);
+
+                $batchData = [
+                    'batch_code' => $request->batch_code,
+                    'expiration_date' => $request->expiration_date,
+                    'idSuppliers' => $request->idSupplier,
+                ];
+
+                if ($request->filled('quantity_now')) {
+                    $batchData['quantity_now'] = $request->quantity_now;
+                }
+
+                $batch->update($batchData);
+            }
+
+            return redirect()->back()->with('success', 'Produto atualizado com sucesso!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao atualizar: '.$e->getMessage());
         }
-        return $category->id;
     }
-    */
+
+    #[OA\Patch(
+        path: '/product/deactivate/{id}',
+        summary: 'Inativa ou reativa um produto (Soft Delete)',
+        description: 'Alterna o status do atributo isActive. Se o produto estiver ativo (true), ele passará a ser inativo (false) e vice-versa.',
+        tags: ['Products'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                description: 'ID numérico do produto a ter o status alterado',
+                required: true,
+                schema: new OA\Schema(type: 'integer', example: 2)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Status do produto alterado com sucesso'
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Produto não encontrado'
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Erro interno ao processar a alteração'
+            )
+        ]
+    )]
+    public function deactivateProduct($id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+
+            // Inverte o status atual: se 1 vira 0, se 0 vira 1
+            $product->isActive = ! $product->isActive;
+            $product->save();
+
+            $status = $product->isActive ? 'reativado' : 'inativado';
+
+            return redirect()->back()->with('success', "Produto {$status} com sucesso!");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao alterar status do produto.');
+        }
+    }
 }

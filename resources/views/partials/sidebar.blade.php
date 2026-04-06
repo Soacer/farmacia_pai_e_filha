@@ -6,49 +6,58 @@
     </div>
 
     <nav class="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
-        
-        <a href="{{ url('/dashboard') }}" 
-           class="flex items-center gap-3 px-4 py-3 {{ Request::is('dashboard') ? 'bg-blue-700' : 'hover:bg-blue-800' }} rounded-lg transition-colors">
-            <i class="fa-solid fa-house text-blue-300"></i> 
+
+        <a href="{{ url('/dashboard') }}"
+            class="flex items-center gap-3 px-4 py-3 {{ Request::is('dashboard') ? 'bg-blue-700' : 'hover:bg-blue-800' }} rounded-lg transition-colors">
+            <i class="fa-solid fa-house text-blue-300"></i>
             <span class="font-medium">Home</span>
         </a>
 
-        <a href="{{ route('select_all_products') }}" 
-           class="flex items-center gap-3 px-4 py-3 {{ Request::is('product/stock*') ? 'bg-blue-700' : 'hover:bg-blue-800' }} rounded-lg transition-colors border border-blue-800/50">
-            <i class="fa-solid fa-boxes-stacked text-blue-300"></i> 
+        <a href="{{ route('select_all_products') }}"
+            class="flex items-center gap-3 px-4 py-3 {{ Request::is('product/stock*') ? 'bg-blue-700' : 'hover:bg-blue-800' }} rounded-lg transition-colors border border-blue-800/50">
+            <i class="fa-solid fa-boxes-stacked text-blue-300"></i>
             <span class="font-medium">Controle de Estoque</span>
+        </a>
+
+        <a href="{{ route('list_suppliers') }}"
+            class="flex items-center gap-3 px-4 py-3 {{ Request::is('suppliers/list') ? 'bg-blue-700' : 'hover:bg-blue-800' }} rounded-lg transition-colors border border-blue-800/50">
+            <i class="fa-solid fa-address-book text-blue-300"></i>
+            <span class="font-medium">Lista de Fornecedores</span>
         </a>
 
         <hr class="border-blue-800 my-4 mx-2">
 
         <details class="group" {{ Request::is('supplier*') || Request::is('product/product-form*') ? 'open' : '' }}>
-            <summary class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-blue-800 cursor-pointer list-none transition-colors">
+            <summary
+                class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-blue-800 cursor-pointer list-none transition-colors">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> 
+                    <i class="fa-solid fa-pen-to-square text-blue-400"></i>
                     <span class="font-medium">Cadastros</span>
                 </div>
-                <i class="fa-solid fa-chevron-down text-[10px] transition-transform group-open:rotate-180 text-blue-400"></i>
+                <i
+                    class="fa-solid fa-chevron-down text-[10px] transition-transform group-open:rotate-180 text-blue-400"></i>
             </summary>
 
             <ul class="mt-2 ml-4 pl-4 border-l-2 border-blue-700 space-y-1">
                 {{-- Apenas Admin (ID 1) vê Funcionários --}}
                 @if (auth()->user()->idRoles == 1)
                     <li>
-                        <a href="#" class="block px-4 py-2 text-sm text-blue-200 hover:text-white hover:bg-blue-800 rounded-lg transition">
+                        <a href="{{ route('create_employee') }}"
+                            class="block px-4 py-2 text-sm text-blue-200 hover:text-white hover:bg-blue-800 rounded-lg transition">
                             Funcionários
                         </a>
                     </li>
                 @endif
 
                 <li>
-                    <a href="{{ route('create_product') }}" 
-                       class="block px-4 py-2 text-sm {{ Request::is('product/product-form*') ? 'text-white bg-blue-800/50' : 'text-blue-200 hover:text-white hover:bg-blue-800' }} rounded-lg transition">
+                    <a href="{{ route('create_product') }}"
+                        class="block px-4 py-2 text-sm {{ Request::is('product/product-form*') ? 'text-white bg-blue-800/50' : 'text-blue-200 hover:text-white hover:bg-blue-800' }} rounded-lg transition">
                         Medicamentos
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('create_supplier') }}" 
-                       class="block px-4 py-2 text-sm {{ Request::is('supplier*') ? 'text-white bg-blue-800/50' : 'text-blue-200 hover:text-white hover:bg-blue-800' }} rounded-lg transition">
+                    <a href="{{ route('create_supplier') }}"
+                        class="block px-4 py-2 text-sm {{ Request::is('supplier*') ? 'text-white bg-blue-800/50' : 'text-blue-200 hover:text-white hover:bg-blue-800' }} rounded-lg transition">
                         Fornecedores
                     </a>
                 </li>
@@ -69,7 +78,7 @@
 
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" 
+            <button type="submit"
                 class="w-full flex items-center justify-center gap-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95">
                 <i class="fa-solid fa-right-from-bracket"></i> Sair
             </button>

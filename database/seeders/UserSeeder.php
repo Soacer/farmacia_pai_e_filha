@@ -47,8 +47,8 @@ class UserSeeder extends Seeder
                         'birth_date' => '1990-01-01',
                         'salary' => 2500.00,
                         'hire_date' => now()->format('Y-m-d'),
-                        'job_title' => 'Balconista',
                         'idUsers' => $user->id,
+                        'idOccupations' => 4, // Balconista
                     ]
                 );
             }

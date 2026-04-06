@@ -1,11 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto py-6 px-4 pb-12" x-data="{ mostrarInativos: false }">
+    <div class="container mx-auto py-6 px-4 pb-12" x-data="{ mostrarInativos: false, editId: null }">
         <div class="max-w-6xl mx-auto bg-white shadow-md rounded-lg border border-slate-200">
 
-            <div
-                class="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-center sticky top-0 z-10 rounded-t-lg">
+            <div class="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-center rounded-t-lg">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800 flex items-center">
                         <span class="text-blue-600 mr-2">📦</span>
@@ -22,21 +21,21 @@
                         <span class="ml-2 text-xs font-bold text-slate-600 uppercase">Mostrar Inativos</span>
                     </label>
                     <a href="{{ route('create_product') }}"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-xs font-bold transition uppercase">
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-xs font-bold transition uppercase tracking-widest">
                         ✚ Novo Produto
                     </a>
                 </div>
             </div>
 
+            @include('partials._alerts')
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
-                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-center">Status</th>
                             <th class="px-6 py-4">Produto / Princípio Ativo</th>
-
                             <th class="px-6 py-4 text-center">Categoria</th>
-
                             <th class="px-6 py-4 text-center">Saldo Total</th>
                             <th class="px-6 py-4 text-center">Estoque Mín.</th>
                             <th class="px-6 py-4 text-right">Ações</th>
@@ -44,20 +43,13 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach ($products as $product)
-                            {{-- Filtro via Alpine.js --}}
                             <tr x-show="mostrarInativos || {{ $product->isActive ? 'true' : 'false' }}"
                                 class="hover:bg-slate-50/50 transition duration-150"
-                                :class="!{{ $product->isActive ? 'true' : 'false' }} ?
-                                    'opacity-60 grayscale-[0.5] bg-slate-50' : ''">
+                                :class="editId === {{ $product->id }} ? 'bg-blue-50/50' : ''">
 
                                 <td class="px-6 py-4 text-center">
-                                    @if ($product->isActive)
-                                        <span
-                                            class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block shadow-sm shadow-green-200"></span>
-                                    @else
-                                        <span
-                                            class="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block shadow-sm shadow-slate-100"></span>
-                                    @endif
+                                    <span
+                                        class="w-2.5 h-2.5 rounded-full {{ $product->isActive ? 'bg-green-500 shadow-green-200' : 'bg-slate-300' }} inline-block shadow-sm"></span>
                                 </td>
 
                                 <td class="px-6 py-4">
@@ -66,18 +58,15 @@
                                         {{ $product->active_principle }}</p>
                                 </td>
 
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-center">
                                     <span
                                         class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded uppercase">
                                         {{ $product->category->class ?? 'Geral' }}
                                     </span>
-                                    <span
-                                        class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded uppercase">
-                                        {{ $product->category->subclass ?? 'Geral' }}
-                                    </span>
                                 </td>
 
                                 @php
+                                    $loteAtual = $product->batch->first(); // Pegamos o primeiro lote para edição
                                     $saldoTotal = $product->batch->sum('quantity_now');
                                     $isBaixo = $saldoTotal <= $product->min_stock_alert;
                                 @endphp
@@ -95,13 +84,167 @@
 
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end space-x-2">
-                                        <button class="text-slate-400 hover:text-blue-600 transition" title="Editar">
+                                        <button
+                                            @click="editId = (editId === {{ $product->id }} ? null : {{ $product->id }})"
+                                            class="text-slate-400 hover:text-blue-600 transition">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
-                                        <button class="text-slate-400 hover:text-indigo-600 transition" title="Ver Lotes">
-                                            <i class="fa-solid fa-layer-group"></i>
-                                        </button>
+                                        {{-- Botão Inativar (Substituindo o antigo) --}}
+                                        @if ($product->isActive)
+                                            <form action="{{ route('deactivate_product', $product->id) }}" method="POST"
+                                                onsubmit="return confirm('Deseja realmente inativar este produto? Ele não aparecerá mais nas vendas.')">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="text-slate-400 hover:text-red-600 transition"
+                                                    title="Inativar Produto">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </form>
+                                        @else
+                                            {{-- Opcional: Botão para Reativar caso esteja inativo --}}
+                                            <form action="{{ route('deactivate_product', $product->id) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    class="text-slate-300 hover:text-green-600 transition"
+                                                    title="Reativar Produto">
+                                                    <i class="fa-solid fa-rotate-left"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
+                                </td>
+                            </tr>
+
+                            <tr x-show="editId === {{ $product->id }}" x-transition class="bg-blue-50/40">
+                                <td colspan="6" class="p-0 border-l-4 border-blue-500">
+                                    <form action="{{ route('update_product', $product->id) }}" method="POST"
+                                        class="p-6 space-y-6">
+                                        @csrf
+                                        @method('PUT')
+
+                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                            <div class="md:col-span-2">
+                                                <label class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Nome
+                                                    do Produto</label>
+                                                <input type="text" name="name" value="{{ $product->name }}"
+                                                    class="w-full px-3 py-2 rounded border border-blue-200 text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white">
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Categoria</label>
+                                                <select name="idCategory"
+                                                    class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none">
+                                                    @foreach ($categories as $cat)
+                                                        <option value="{{ $cat->id }}"
+                                                            {{ $product->idCategory == $cat->id ? 'selected' : '' }}>
+                                                            {{ $cat->class }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Cód.
+                                                    Barras</label>
+                                                <input type="text" name="barcode" value="{{ $product->barcode }}"
+                                                    class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none">
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div class="md:col-span-2">
+                                                <label
+                                                    class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Princípio
+                                                    Ativo</label>
+                                                <input type="text" name="active_principle"
+                                                    value="{{ $product->active_principle }}"
+                                                    class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none">
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Fornecedor
+                                                    (Seleção)
+                                                </label>
+                                                <select name="idSupplier"
+                                                    class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none">
+                                                    <option value="">Selecione um fornecedor...</option>
+                                                    @foreach ($suppliers as $sup)
+                                                        <option value="{{ $sup->id }}"
+                                                            {{ ($loteAtual->idSuppliers ?? '') == $sup->id ? 'selected' : '' }}>
+                                                            {{ $sup->company_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4">
+                                            <label
+                                                class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Descrição
+                                                Comercial / Detalhes</label>
+                                            <textarea name="description" rows="2"
+                                                class="w-full px-3 py-2 rounded border border-blue-200 text-sm outline-none resize-none focus:border-blue-500 bg-white shadow-sm">{{ $product->description }}</textarea>
+                                        </div>
+                                        @if ($loteAtual)
+                                            <div class="pt-4 border-t border-blue-100">
+                                                <div class="flex items-center space-x-2 mb-3">
+                                                    <span class="w-2 h-4 bg-emerald-500 rounded-full"></span>
+                                                    <h3 class="text-[10px] font-bold text-slate-600 uppercase">Informações
+                                                        do Lote Atual</h3>
+                                                </div>
+                                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                    <input type="hidden" name="idBatch" value="{{ $loteAtual->id }}">
+                                                    <div>
+                                                        <label
+                                                            class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cód.
+                                                            Lote</label>
+                                                        <input type="text" name="batch_code"
+                                                            value="{{ $loteAtual->batch_code }}"
+                                                            class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white outline-none">
+                                                    </div>
+                                                    <div>
+                                                        <label
+                                                            class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Vencimento</label>
+                                                        <input type="date" name="expiration_date"
+                                                            value="{{ $loteAtual->expiration_date }}"
+                                                            class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white">
+                                                    </div>
+                                                    <div>
+                                                        <label
+                                                            class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd
+                                                            Atual</label>
+                                                        <input type="number" name="quantity_now"
+                                                            value="{{ $loteAtual->quantity_now }}"
+                                                            class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white">
+                                                    </div>
+                                                    <div>
+                                                        <label
+                                                            class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Preço
+                                                            Venda (R$)</label>
+                                                        <input type="text" name="price"
+                                                            value="{{ number_format($product->price, 2, ',', '.') }}"
+                                                            class="w-full px-3 py-2 rounded border border-blue-200 text-sm font-bold text-blue-700 bg-white">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <div class="flex justify-between items-center pt-4 border-t border-blue-100">
+                                            <label class="flex items-center cursor-pointer">
+                                                <input type="checkbox" name="requires_prescription" value="1"
+                                                    {{ $product->requires_prescription ? 'checked' : '' }}
+                                                    class="w-4 h-4 text-red-600 rounded">
+                                                <span class="ml-2 text-[10px] font-bold text-slate-600 uppercase">Reter
+                                                    Receita</span>
+                                            </label>
+                                            <div class="flex space-x-3">
+                                                <button type="button" @click="editId = null"
+                                                    class="text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest">Cancelar</button>
+                                                <button type="submit"
+                                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow-lg text-xs font-bold transition uppercase tracking-widest transform active:scale-95">
+                                                    Salvar Alterações
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach

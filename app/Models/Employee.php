@@ -2,24 +2,36 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
     use SoftDeletes;
 
+    // No Employee.php, adicione o relacionamento:
+    public function occupation()
+    {
+        return $this->belongsTo(Occupation::class, 'idOccupation');
+    }
+
+    // Atualize o $fillable:
     protected $fillable = [
-        'idUsers', 
-        'cpf', 
-        'phone', 
-        'birth_date', 
-        'salary', 
-        'hire_date', 
-        'pis', 
-        'job_title', 
-        'isActive'
+        'idUsers',
+        'idOccupations',
+        'cpf',
+        'rg',
+        'phone',
+        'birth_date',
+        'gender',
+        'salary',
+        'hire_date',
+        'resignation_date',
+        'pis',
+        'ctps',
+        'crf',
+        'isActive',
     ];
 
     // Mutator para CPF
@@ -42,5 +54,11 @@ class Employee extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'idUsers');
+    }
+
+    public function address()
+    {
+        // Retorna apenas um objeto de endereço
+        return $this->hasOne(Address::class, 'idEmployee');
     }
 }

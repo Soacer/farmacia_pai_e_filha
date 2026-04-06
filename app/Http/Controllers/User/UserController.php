@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
 
-#[OA\Info(title: "Farmácia Pai e Filha API", version: "1.0.0")]
 class UserController extends Controller
 {
     //
@@ -54,12 +53,22 @@ class UserController extends Controller
                     'isActive' => 1,
                     'idRoles' => 3, //Forçado como Cliente (Customer)
                 ]);
-                Customer::create([
+                $customer = Customer::create([
                     'name' => $request->name,
                     'cpf' => $request->cpf,
                     'phone' => $request->phone,
                     'birth_date' => $request->birth_date,
                     'idUsers' => $user->id,
+                ]);
+
+                $customer->addresses()->create([
+                    'zip_code'     => $request->zip_code,
+                    'street'       => $request->street,
+                    'number'       => $request->number,
+                    'complement'   => $request->complement,
+                    'neighborhood' => $request->neighborhood,
+                    'city'         => $request->city ?? 'Salvador',
+                    'state'        => $request->state ?? 'BA',
                 ]);
 
                 return redirect()->route('login')->with('success', 'Conta criada com sucesso!');
@@ -95,6 +104,6 @@ class UserController extends Controller
     )]
     public function showRegistrationForm()
     {
-        return view('cadastro');
+        return view('create_customer');
     }
 }

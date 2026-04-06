@@ -9,3 +9,9 @@ Route::get('/all-products', [ProductController::class, 'showAllProducts'])->name
 
 // POST
 Route::post('/create-product', [ProductController::class, 'createProduct'])->name('store_product');
+
+//PUT
+Route::put('/product/update/{id}', [ProductController::class, 'updateProduct'])->name('update_product');
+
+//PATCH
+Route::patch('/product/deactivate/{id}', [ProductController::class, 'deactivateProduct'])->name('deactivate_product');

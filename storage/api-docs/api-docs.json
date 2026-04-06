@@ -60,10 +60,430 @@
                     }
                 }
             }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Encerra a sessão do usuário e invalida o token",
+                "operationId": "fe1c1eca634ba2811908fec5e5183950",
+                "responses": {
+                    "302": {
+                        "description": "Logout realizado com sucesso, redireciona para a home"
+                    }
+                }
+            }
+        },
+        "/create-product": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Cria um produto e opcionalmente fornecedor/lote",
+                "description": "Registra o produto e, se solicitado, cria o fornecedor com endereço e o primeiro lote.",
+                "operationId": "450a0d405226a5c2a1305695ed1bb3b4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "idCategory",
+                                    "name",
+                                    "price",
+                                    "barcode"
+                                ],
+                                "properties": {
+                                    "idCategory": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Dipirona 500mg"
+                                    },
+                                    "barcode": {
+                                        "type": "string",
+                                        "example": "7891234567890"
+                                    },
+                                    "price": {
+                                        "type": "string",
+                                        "example": "15,50"
+                                    },
+                                    "min_stock_alert": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "novoFornecedor": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "cnpj": {
+                                        "type": "string",
+                                        "example": "12345678000199"
+                                    },
+                                    "zip_code": {
+                                        "type": "string",
+                                        "example": "41000000"
+                                    },
+                                    "street": {
+                                        "type": "string",
+                                        "example": "Avenida Sete de Setembro"
+                                    },
+                                    "number": {
+                                        "type": "string",
+                                        "example": "100"
+                                    },
+                                    "neighborhood": {
+                                        "type": "string",
+                                        "example": "Centro"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Salvador"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "example": "BA"
+                                    },
+                                    "batch_code": {
+                                        "type": "string",
+                                        "example": "LOT-2026-X"
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 100
+                                    },
+                                    "expiration_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2028-12-31"
+                                    },
+                                    "cost_price": {
+                                        "type": "string",
+                                        "example": "5,50"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sucesso"
+                    },
+                    "500": {
+                        "description": "Erro Interno"
+                    }
+                }
+            }
+        },
+        "/product/update/{id}": {
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Atualiza produto e lote simultaneamente",
+                "operationId": "9b072fa387b78c4661dbe7a637bdbac4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "idCategory": {
+                                        "type": "integer"
+                                    },
+                                    "barcode": {
+                                        "type": "string"
+                                    },
+                                    "active_principle": {
+                                        "type": "string"
+                                    },
+                                    "price": {
+                                        "type": "string"
+                                    },
+                                    "batch_code": {
+                                        "type": "string"
+                                    },
+                                    "quantity_now": {
+                                        "type": "integer"
+                                    },
+                                    "idSupplier": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sucesso"
+                    }
+                }
+            }
+        },
+        "/product/deactivate/{id}": {
+            "patch": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Inativa ou reativa um produto (Soft Delete)",
+                "description": "Alterna o status do atributo isActive. Se o produto estiver ativo (true), ele passará a ser inativo (false) e vice-versa.",
+                "operationId": "aedfd8ea60fa0c4118ac7be1faa89ce6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID numérico do produto a ter o status alterado",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status do produto alterado com sucesso"
+                    },
+                    "404": {
+                        "description": "Produto não encontrado"
+                    },
+                    "500": {
+                        "description": "Erro interno ao processar a alteração"
+                    }
+                }
+            }
+        },
+        "/supplier/supplier-form": {
+            "get": {
+                "tags": [
+                    "Fornecedores"
+                ],
+                "summary": "Exibe o formulário de cadastro de fornecedores",
+                "operationId": "2275dac2803e7245bc51ee05538baef7",
+                "responses": {
+                    "200": {
+                        "description": "Visualização carregada"
+                    }
+                }
+            }
+        },
+        "/suppliers/list": {
+            "get": {
+                "tags": [
+                    "Fornecedores"
+                ],
+                "summary": "Lista todos os fornecedores cadastrados",
+                "operationId": "c665580028c95d11fca65d7d8ad83f17",
+                "responses": {
+                    "200": {
+                        "description": "Lista carregada com sucesso"
+                    }
+                }
+            }
+        },
+        "/supplier/store-supplier": {
+            "post": {
+                "tags": [
+                    "Fornecedores"
+                ],
+                "summary": "Cadastra um fornecedor e seu endereço",
+                "operationId": "b56476ae9df3f4d3581ed612fb4051a5",
+                "responses": {
+                    "201": {
+                        "description": "Fornecedor criado com sucesso"
+                    }
+                }
+            }
+        },
+        "/supplier/update/{id}": {
+            "put": {
+                "tags": [
+                    "Fornecedores"
+                ],
+                "summary": "Atualiza dados cadastrais e endereço do fornecedor",
+                "operationId": "fc99c2deb804f3f5fb3620ef9bb9ed67",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dados atualizados com sucesso"
+                    }
+                }
+            }
+        },
+        "/supplier/deactivate/{id}": {
+            "patch": {
+                "tags": [
+                    "Fornecedores"
+                ],
+                "summary": "Inativa ou reativa um fornecedor (Soft Delete)",
+                "operationId": "3b1be5a8587f7c995ed13e2f6204adc8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status alterado com sucesso"
+                    }
+                }
+            }
+        },
+        "/login/cadastro": {
+            "post": {
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Registra um novo cliente no sistema",
+                "description": "Cria simultaneamente um registro na tabela Users e na tabela Customers dentro de uma transação.",
+                "operationId": "a5b5fb365e903d08932a31efefcf5d36",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "cpf",
+                                    "phone",
+                                    "birth_date"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Alisson Rodrigo"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "alisson@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "12345678"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "12345678"
+                                    },
+                                    "cpf": {
+                                        "type": "string",
+                                        "example": "123.456.789-00"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "71988887777"
+                                    },
+                                    "birth_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1998-03-14"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Usuário criado e redirecionado para o login"
+                    },
+                    "422": {
+                        "description": "Erro de validação (CPF duplicado, e-mail inválido, etc.)"
+                    },
+                    "500": {
+                        "description": "Erro interno ao processar a transação no banco"
+                    }
+                }
+            }
+        },
+        "/user/cadastro": {
+            "get": {
+                "tags": [
+                    "Público / Autenticação"
+                ],
+                "summary": "Exibe a página de cadastro de novos clientes",
+                "description": "Retorna a interface HTML do formulário de registro para clientes (IdRoles = 3).",
+                "operationId": "showRegistrationForm",
+                "responses": {
+                    "200": {
+                        "description": "Página de cadastro carregada com sucesso.",
+                        "content": {
+                            "text/html": {}
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor ao carregar a view."
+                    }
+                }
+            }
         }
     },
     "components": {
         "schemas": {
+            "Category": {
+                "title": "Categoria de Medicamento",
+                "description": "Classes e subclasses terapêuticas",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "class": {
+                        "type": "string",
+                        "example": "Sistema Nervoso"
+                    },
+                    "subclass": {
+                        "type": "string",
+                        "example": "Analgésicos"
+                    },
+                    "isActive": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
             "Customer": {
                 "title": "Cliente/Funcionário",
                 "description": "Estrutura de dados para cadastro de pessoas",
@@ -91,6 +511,54 @@
                     "address": {
                         "type": "string",
                         "example": "Rua Principal, 123"
+                    }
+                },
+                "type": "object"
+            },
+            "Product": {
+                "title": "Produto",
+                "description": "Modelo de representação de um medicamento ou item de conveniência",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "idCategory": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Paracetamol 500mg"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Analgésico e antitérmico para dores leves"
+                    },
+                    "barcode": {
+                        "type": "string",
+                        "example": "7891234567890"
+                    },
+                    "active_principle": {
+                        "type": "string",
+                        "example": "Paracetamol"
+                    },
+                    "isActive": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "requires_prescription": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 15.5
+                    },
+                    "min_stock_alert": {
+                        "type": "integer",
+                        "example": 10
                     }
                 },
                 "type": "object"
@@ -148,6 +616,18 @@
         {
             "name": "Painel",
             "description": "Painel"
+        },
+        {
+            "name": "Products",
+            "description": "Products"
+        },
+        {
+            "name": "Fornecedores",
+            "description": "Fornecedores"
+        },
+        {
+            "name": "Público / Autenticação",
+            "description": "Público / Autenticação"
         }
     ]
 }

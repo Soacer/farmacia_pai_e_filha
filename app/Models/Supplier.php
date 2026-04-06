@@ -29,4 +29,10 @@ class Supplier extends Model
             set: fn (string $value) => preg_replace('/[^0-9]/', '', $value),
         );
     }
+
+    public function addresses()
+    {
+        // Retorna uma coleção (array) de endereços
+        return $this->hasMany(Address::class, 'idSupplier');
+    }
 }

@@ -17,24 +17,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        //Cria as Classes e Subclasses dos Produtos
+        $this->call(RoleSeeder::class);
+        $this->createAdminUser();
         $this->call([
             CategorySeeder::class,
-        ]);
-        // User::factory(10)->create();
-        // Cria as Roles
-        $this->call([
-            RoleSeeder::class,
-        ]);
-        // Cria a conta do ADM
-        $this->createAdminUser();
-        // Cria a conta do TESTER
-        $this->call([
+            OccupationSeeder::class,
             UserSeeder::class,
         ]);
     }
 
-    private function createAdminUser(): void{
+    private function createAdminUser(): void
+    {
 
         if (Role::where('roles', 'admin')->first()) {
             User::firstOrCreate(

@@ -10,24 +10,31 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('employees', function (Blueprint $table) {
-        $table->id();
-        $table->unsignedBigInteger('idUsers'); // FK para a tabela users
-        $table->string('cpf', 11)->unique();
-        $table->string('phone', 11);
-        $table->date('birth_date');
-        $table->decimal('salary', 10, 2)->nullable(); // Salário
-        $table->date('hire_date')->nullable();        // Data de admissão
-        $table->string('pis', 11)->nullable();        // PIS/PASEP
-        $table->string('job_title')->nullable();      // Cargo (ex: Farmacêutico, Balconista)
-        $table->boolean('isActive')->default(true);
-        
-        $table->foreign('idUsers')->references('id')->on('users')->onDelete('cascade');
-        $table->timestamps();
-        $table->softDeletes();
-    });
-}
+    {
+        Schema::create('employees', function (Blueprint $table) {
+            $table->id();
+
+            // Forma moderna e mais segura de referenciar chaves estrangeiras:
+            $table->foreignId('idUsers')->constrained('users')->onDelete('cascade');
+            $table->foreignId('idOccupations')->constrained('occupations'); // O Laravel entende que idOccupation aponta para occupations.id
+
+            $table->string('cpf', 11)->unique();
+            $table->string('rg', 15)->nullable();
+            $table->string('phone', 11);
+            $table->date('birth_date');
+            $table->enum('gender', ['M', 'F', 'Outro'])->nullable();
+            $table->decimal('salary', 10, 2)->nullable();
+            $table->date('hire_date')->nullable();
+            $table->date('resignation_date')->nullable();
+            $table->string('pis', 11)->nullable();
+            $table->string('ctps', 20)->nullable();
+            $table->string('crf', 15)->nullable();
+            $table->boolean('isActive')->default(true);
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
 
     /**
      * Reverse the migrations.
