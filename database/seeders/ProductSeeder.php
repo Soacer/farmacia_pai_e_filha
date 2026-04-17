@@ -2,46 +2,80 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Product;
-use App\Models\Category;
 use App\Enums\CategorySubclass;
+use App\Models\Batch;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\Supplier;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
     public function run(): void
     {
+        // 1. Desativa constraints para limpar as tabelas com segurança
         Schema::disableForeignKeyConstraints();
+        Batch::truncate();
         Product::truncate();
         Schema::enableForeignKeyConstraints();
+
+        // 2. Garante a existência de um Fornecedor para vincular aos lotes
+        $supplier = Supplier::first() ?? Supplier::create([
+            'id' => (string) Str::uuid(),
+            'company_name' => 'Distribuidora Pharma Central Ltda',
+            'trade_name' => 'Pharma Central',
+            'cnpj' => '12345678000199',
+            'email' => 'contato@pharmacentral.com',
+            'phone' => '71988887777',
+            'contact_name' => 'Gerente de Vendas',
+            'isActive' => true,
+        ]);
 
         $allData = $this->getFullDataSet();
 
         foreach ($allData as $subclassKey => $items) {
             $subclassEnum = CategorySubclass::from($subclassKey);
-            
-            // Cria ou encontra a categoria baseada no Enum
+
+            // 3. Cria ou encontra a categoria baseada no Enum
             $category = Category::firstOrCreate(
                 ['subclass' => $subclassEnum->label()],
                 [
                     'class' => $subclassEnum->categoryClass()->label(),
-                    'isActive' => true
+                    'isActive' => true,
                 ]
             );
 
             foreach ($items as $index => $item) {
-                Product::create([
-                    'idCategory'            => $category->id,
-                    'name'                  => $item['name'],
-                    'description'           => $item['desc'] ?? "Descrição detalhada para " . $item['name'],
-                    'barcode'               => '789' . str_pad(abs(crc32($subclassKey . $index)), 10, '0', STR_PAD_LEFT),
-                    'active_principle'      => $item['principle'],
-                    'price'                 => $item['price'],
-                    'min_stock_alert'       => rand(5, 20),
-                    'isActive'              => true,
+                // 4. Cria o Produto
+                $product = Product::create([
+                    'id' => (string) Str::uuid(),
+                    'idCategory' => $category->id,
+                    'name' => $item['name'],
+                    'description' => $item['desc'] ?? 'Descrição detalhada para '.$item['name'],
+                    'barcode' => '789'.str_pad(abs(crc32($subclassKey.$index)), 10, '0', STR_PAD_LEFT),
+                    'active_principle' => $item['principle'],
+                    'price' => $item['price'],
+                    'min_stock_alert' => rand(5, 20),
+                    'isActive' => true,
                     'requires_prescription' => $item['rx'],
-                    'image_path'            => "products/1862579758566595.webp",
+                    'image_path' => 'products/1862579758566595.webp',
+                ]);
+
+                // 5. Cria o Lote (Batch) associado ao produto recém-criado
+                $quantity = rand(20, 100);
+
+                Batch::create([
+                    'id' => (string) Str::uuid(),
+                    'idProducts' => $product->id,
+                    'idSuppliers' => $supplier->id,
+                    'batch_code' => 'LOT-'.strtoupper(Str::random(6)),
+                    'manufacturing_date' => now()->subMonths(rand(1, 12)),
+                    'expiration_date' => now()->addYears(rand(1, 2)),
+                    'quantity' => $quantity,
+                    'quantity_now' => $quantity,
+                    'cost_price' => $item['price'] * 0.55, // Custo médio de 55% do preço de venda
                 ]);
             }
         }

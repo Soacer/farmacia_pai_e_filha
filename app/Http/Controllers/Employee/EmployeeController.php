@@ -24,11 +24,24 @@ class EmployeeController extends Controller
             new OA\Parameter(
                 name: 'id',
                 in: 'path',
-                description: 'ID do funcionário',
+                description: 'ID (UUID) do funcionário',
                 required: true,
-                schema: new OA\Schema(type: 'integer')
+                schema: new OA\Schema(type: 'string', format: 'uuid')
             )
         ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'idOccupation', type: 'integer', example: 1),
+                    new OA\Property(property: 'cpf', type: 'string', example: '123.456.789-01'),
+                    new OA\Property(property: 'phone', type: 'string', example: '71988887777'),
+                    new OA\Property(property: 'salary', type: 'number', format: 'float', example: 2500.50),
+                    new OA\Property(property: 'isActive', type: 'boolean', example: true),
+                    new OA\Property(property: 'hire_date', type: 'string', format: 'date'),
+                ]
+            )
+        ),
         responses: [
             new OA\Response(response: 200, description: 'Atualizado com sucesso'),
             new OA\Response(response: 404, description: 'Funcionário não encontrado')
@@ -37,7 +50,6 @@ class EmployeeController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            //dd($request->all());
             $employee = Employee::findOrFail($id);
 
             $employeeData = [
@@ -68,30 +80,21 @@ class EmployeeController extends Controller
     #[OA\Patch(
         path: '/employees/{id}/deactivate',
         summary: 'Ativa ou desativa um funcionário (Toggle status)',
-        description: 'Inverte o status atual do funcionário: se estiver ativo, torna-o inativo e vice-versa.',
+        description: 'Inverte o status atual do funcionário.',
         tags: ['Funcionários'],
         parameters: [
             new OA\Parameter(
                 name: 'id',
                 in: 'path',
-                description: 'ID do funcionário',
+                description: 'ID (UUID) do funcionário',
                 required: true,
-                schema: new OA\Schema(type: 'integer', example: 1)
+                schema: new OA\Schema(type: 'string', format: 'uuid')
             ),
         ],
         responses: [
-            new OA\Response(
-                response: 200,
-                description: 'Status alterado com sucesso'
-            ),
-            new OA\Response(
-                response: 404,
-                description: 'Funcionário não encontrado'
-            ),
-            new OA\Response(
-                response: 500,
-                description: 'Erro interno ao processar a alteração'
-            ),
+            new OA\Response(response: 200, description: 'Status alterado com sucesso'),
+            new OA\Response(response: 404, description: 'Funcionário não encontrado'),
+            new OA\Response(response: 500, description: 'Erro interno')
         ]
     )]
     public function deactivateEmployee($id)
@@ -115,7 +118,7 @@ class EmployeeController extends Controller
         path: '/employee/create',
         summary: 'Exibe o formulário de cadastro de funcionários',
         tags: ['Funcionários'],
-        responses: [new OA\Response(response: 200, description: 'OK')]
+        responses: [new OA\Response(response: 200, description: 'Retorna a View HTML')]
     )]
     public function showCreateForm()
     {
@@ -126,9 +129,29 @@ class EmployeeController extends Controller
 
     #[OA\Post(
         path: '/employee/store',
-        summary: 'Cadastra um novo funcionário completo (User, Employee, Address)',
+        summary: 'Cadastra um novo funcionário completo',
+        description: 'Cria User (Role 2), Employee e Address em uma transação única.',
         tags: ['Funcionários'],
-        responses: [new OA\Response(response: 201, description: 'Criado com sucesso')]
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name', 'email', 'password', 'cpf', 'idOccupation'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'João Silva'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'joao@farmacia.com'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password'),
+                    new OA\Property(property: 'idOccupation', type: 'integer', example: 1),
+                    new OA\Property(property: 'cpf', type: 'string', example: '000.000.000-00'),
+                    new OA\Property(property: 'zip_code', type: 'string', example: '41000-000'),
+                    new OA\Property(property: 'street', type: 'string', example: 'Rua Exemplo'),
+                    new OA\Property(property: 'number', type: 'string', example: '123')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Criado com sucesso'),
+            new OA\Response(response: 422, description: 'Erro de validação')
+        ]
     )]
     public function store(StoreEmployeeRequest $request)
     {
@@ -172,9 +195,14 @@ class EmployeeController extends Controller
 
     #[OA\Get(
         path: '/employee/list',
-        summary: 'Lista todos os funcionários',
+        summary: 'Lista todos os funcionários cadastrados',
         tags: ['Funcionários'],
-        responses: [new OA\Response(response: 200, description: 'Lista carregada')]
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: 'Retorna a view com a listagem completa'
+            )
+        ]
     )]
     public function showAllEmployees()
     {

@@ -75,6 +75,280 @@
                 }
             }
         },
+        "/employees/{id}": {
+            "put": {
+                "tags": [
+                    "Funcionários"
+                ],
+                "summary": "Atualiza os dados de um funcionário",
+                "operationId": "b3a9ade2ed93de1c1069d0529fee56b0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID (UUID) do funcionário",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "idOccupation": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "cpf": {
+                                        "type": "string",
+                                        "example": "123.456.789-01"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "71988887777"
+                                    },
+                                    "salary": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2500.5
+                                    },
+                                    "isActive": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "hire_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado com sucesso"
+                    },
+                    "404": {
+                        "description": "Funcionário não encontrado"
+                    }
+                }
+            }
+        },
+        "/employees/{id}/deactivate": {
+            "patch": {
+                "tags": [
+                    "Funcionários"
+                ],
+                "summary": "Ativa ou desativa um funcionário (Toggle status)",
+                "description": "Inverte o status atual do funcionário.",
+                "operationId": "cd7492295a899ffd162e7f791f7d85d0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID (UUID) do funcionário",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status alterado com sucesso"
+                    },
+                    "404": {
+                        "description": "Funcionário não encontrado"
+                    },
+                    "500": {
+                        "description": "Erro interno"
+                    }
+                }
+            }
+        },
+        "/employee/create": {
+            "get": {
+                "tags": [
+                    "Funcionários"
+                ],
+                "summary": "Exibe o formulário de cadastro de funcionários",
+                "operationId": "8e3de8c1d40b4bdca5bfcd3927ffb0c1",
+                "responses": {
+                    "200": {
+                        "description": "Retorna a View HTML"
+                    }
+                }
+            }
+        },
+        "/employee/store": {
+            "post": {
+                "tags": [
+                    "Funcionários"
+                ],
+                "summary": "Cadastra um novo funcionário completo",
+                "description": "Cria User (Role 2), Employee e Address em uma transação única.",
+                "operationId": "c81489ea4475afcd4ca5aea00e9f24af",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "cpf",
+                                    "idOccupation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "João Silva"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "joao@farmacia.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "idOccupation": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "cpf": {
+                                        "type": "string",
+                                        "example": "000.000.000-00"
+                                    },
+                                    "zip_code": {
+                                        "type": "string",
+                                        "example": "41000-000"
+                                    },
+                                    "street": {
+                                        "type": "string",
+                                        "example": "Rua Exemplo"
+                                    },
+                                    "number": {
+                                        "type": "string",
+                                        "example": "123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado com sucesso"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                }
+            }
+        },
+        "/employee/list": {
+            "get": {
+                "tags": [
+                    "Funcionários"
+                ],
+                "summary": "Lista todos os funcionários cadastrados",
+                "operationId": "95f2c7cffa5b7a44f316ef870e829e56",
+                "responses": {
+                    "200": {
+                        "description": "Retorna a view com a listagem completa"
+                    }
+                }
+            }
+        },
+        "/product/{id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Exibe os detalhes de um produto específico",
+                "operationId": "f2f7fd834f846a9529e8a7b87d474cb7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retorna a view de detalhes do produto"
+                    },
+                    "404": {
+                        "description": "Produto não encontrado"
+                    }
+                }
+            }
+        },
+        "/product/all-products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Lista todos os produtos com paginação e ordenação",
+                "operationId": "0b560a752c43a4ca0ba6c998088c0e03",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Quantidade de itens (10, 15, 20, 25, 30)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número da página",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retorna a view do estoque de produtos"
+                    }
+                }
+            }
+        },
+        "/product/create": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Exibe o formulário de cadastro de novo produto",
+                "operationId": "20d1710d4f2b88e930fc325732537ba5",
+                "responses": {
+                    "200": {
+                        "description": "Retorna a view de criação"
+                    }
+                }
+            }
+        },
         "/create-product": {
             "post": {
                 "tags": [
@@ -193,14 +467,15 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "properties": {
                                     "name": {
@@ -209,23 +484,19 @@
                                     "idCategory": {
                                         "type": "integer"
                                     },
-                                    "barcode": {
-                                        "type": "string"
-                                    },
-                                    "active_principle": {
-                                        "type": "string"
-                                    },
                                     "price": {
                                         "type": "string"
                                     },
-                                    "batch_code": {
-                                        "type": "string"
+                                    "image_product": {
+                                        "type": "string",
+                                        "format": "binary"
                                     },
                                     "quantity_now": {
                                         "type": "integer"
                                     },
-                                    "idSupplier": {
-                                        "type": "integer"
+                                    "idBatch": {
+                                        "type": "string",
+                                        "format": "uuid"
                                     }
                                 },
                                 "type": "object"
@@ -235,7 +506,10 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Sucesso"
+                        "description": "Produto atualizado com sucesso"
+                    },
+                    "404": {
+                        "description": "Produto não encontrado"
                     }
                 }
             }
@@ -246,29 +520,24 @@
                     "Products"
                 ],
                 "summary": "Inativa ou reativa um produto (Soft Delete)",
-                "description": "Alterna o status do atributo isActive. Se o produto estiver ativo (true), ele passará a ser inativo (false) e vice-versa.",
                 "operationId": "aedfd8ea60fa0c4118ac7be1faa89ce6",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID numérico do produto a ter o status alterado",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 2
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Status do produto alterado com sucesso"
+                        "description": "Status alterado com sucesso"
                     },
                     "404": {
                         "description": "Produto não encontrado"
-                    },
-                    "500": {
-                        "description": "Erro interno ao processar a alteração"
                     }
                 }
             }
@@ -461,13 +730,135 @@
     },
     "components": {
         "schemas": {
+            "Address": {
+                "title": "Endereço",
+                "description": "Modelo de representação de endereços para clientes, funcionários ou fornecedores",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "7c9e1234-5678-90ab-cdef-1234567890ab"
+                    },
+                    "idCustomer": {
+                        "description": "ID do Cliente associado",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                        "nullable": true
+                    },
+                    "idEmployee": {
+                        "description": "ID do Funcionário associado",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "idSupplier": {
+                        "description": "ID do Fornecedor associado",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "zip_code": {
+                        "description": "CEP (apenas números devido ao cast do Model)",
+                        "type": "string",
+                        "example": "41000000"
+                    },
+                    "street": {
+                        "type": "string",
+                        "example": "Avenida Sete de Setembro"
+                    },
+                    "number": {
+                        "type": "string",
+                        "example": "100"
+                    },
+                    "complement": {
+                        "type": "string",
+                        "example": "Apartamento 201",
+                        "nullable": true
+                    },
+                    "neighborhood": {
+                        "type": "string",
+                        "example": "Centro"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Salvador"
+                    },
+                    "state": {
+                        "type": "string",
+                        "maxLength": 2,
+                        "example": "BA"
+                    }
+                },
+                "type": "object"
+            },
+            "Batch": {
+                "title": "Lote",
+                "description": "Representa a entrada física de um produto no estoque, controlando validade e preço de custo",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "7c9e1234-5678-90ab-cdef-1234567890ab"
+                    },
+                    "idProducts": {
+                        "description": "ID do produto vinculado a este lote",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "idSuppliers": {
+                        "description": "ID do fornecedor que entregou este lote",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                    },
+                    "batch_code": {
+                        "description": "Código de identificação do lote (impresso na embalagem)",
+                        "type": "string",
+                        "example": "LOT-2026-X12"
+                    },
+                    "manufacturing_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-01-20",
+                        "nullable": true
+                    },
+                    "expiration_date": {
+                        "description": "Data de validade do lote",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2028-12-31"
+                    },
+                    "quantity": {
+                        "description": "Quantidade total que entrou no estoque",
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "quantity_now": {
+                        "description": "Quantidade que ainda resta disponível para venda",
+                        "type": "integer",
+                        "example": 85
+                    },
+                    "cost_price": {
+                        "description": "Preço de custo unitário do item no momento da entrada",
+                        "type": "number",
+                        "format": "float",
+                        "example": 5.5
+                    }
+                },
+                "type": "object"
+            },
             "Category": {
                 "title": "Categoria de Medicamento",
                 "description": "Classes e subclasses terapêuticas",
                 "properties": {
                     "id": {
-                        "type": "integer",
-                        "example": 1
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "7c9e1234-5678-90ab-cdef-1234567890ab"
                     },
                     "class": {
                         "type": "string",
@@ -488,9 +879,10 @@
                 "title": "Cliente/Funcionário",
                 "description": "Estrutura de dados para cadastro de pessoas",
                 "properties": {
-                    "idCustomers": {
-                        "type": "integer",
-                        "example": 1
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "7c9e1234-5678-90ab-cdef-1234567890ab"
                     },
                     "name": {
                         "type": "string",
@@ -515,17 +907,131 @@
                 },
                 "type": "object"
             },
+            "Employee": {
+                "title": "Funcionário",
+                "description": "Modelo de representação detalhada de um funcionário da farmácia",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "7c9e1234-5678-90ab-cdef-1234567890ab"
+                    },
+                    "idUsers": {
+                        "description": "ID do usuário vinculado para login",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "idOccupations": {
+                        "description": "ID do cargo/ocupação",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                    },
+                    "cpf": {
+                        "description": "CPF (apenas números)",
+                        "type": "string",
+                        "example": "12345678901"
+                    },
+                    "rg": {
+                        "description": "RG (apenas números)",
+                        "type": "string",
+                        "example": "123456789"
+                    },
+                    "phone": {
+                        "description": "Telefone com DDD",
+                        "type": "string",
+                        "example": "71988887777"
+                    },
+                    "birth_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "1998-03-14"
+                    },
+                    "gender": {
+                        "description": "Gênero (M, F, Outro)",
+                        "type": "string",
+                        "example": "M"
+                    },
+                    "salary": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 3500.5
+                    },
+                    "hire_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-01-02"
+                    },
+                    "resignation_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "pis": {
+                        "description": "Número do PIS",
+                        "type": "string",
+                        "example": "12012345678"
+                    },
+                    "ctps": {
+                        "description": "Carteira de Trabalho",
+                        "type": "string",
+                        "example": "12345670001"
+                    },
+                    "crf": {
+                        "description": "Conselho Regional de Farmácia (obrigatório para farmacêuticos)",
+                        "type": "string",
+                        "example": "12345/BA",
+                        "nullable": true
+                    },
+                    "isActive": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "Occupation": {
+                "title": "Ocupação/Cargo",
+                "description": "Modelo que define os cargos dentro da farmácia e suas exigências legais",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                    },
+                    "name": {
+                        "description": "Nome do cargo",
+                        "type": "string",
+                        "example": "Farmacêutico RT"
+                    },
+                    "requires_crf": {
+                        "description": "Indica se o cargo exige registro no Conselho Regional de Farmácia",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "isActive": {
+                        "description": "Status do cargo no sistema",
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
             "Product": {
                 "title": "Produto",
                 "description": "Modelo de representação de um medicamento ou item de conveniência",
                 "properties": {
                     "id": {
-                        "type": "integer",
-                        "example": 1
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
                     },
                     "idCategory": {
-                        "type": "integer",
-                        "example": 5
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
                     },
                     "name": {
                         "type": "string",
@@ -567,12 +1073,64 @@
                 "title": "Permissão",
                 "properties": {
                     "id": {
-                        "type": "integer",
-                        "example": 1
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
                     },
                     "roles": {
                         "type": "string",
                         "example": "employee"
+                    }
+                },
+                "type": "object"
+            },
+            "Supplier": {
+                "title": "Fornecedor",
+                "description": "Modelo de representação de fornecedores de medicamentos e insumos",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "3f9e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "company_name": {
+                        "description": "Razão Social da empresa",
+                        "type": "string",
+                        "example": "Distribuidora de Medicamentos Bahia Ltda"
+                    },
+                    "trade_name": {
+                        "description": "Nome Fantasia",
+                        "type": "string",
+                        "example": "Dismed Salvador"
+                    },
+                    "cnpj": {
+                        "description": "CNPJ (apenas números)",
+                        "type": "string",
+                        "example": "12345678000199"
+                    },
+                    "contact_name": {
+                        "description": "Nome da pessoa de contato no fornecedor",
+                        "type": "string",
+                        "example": "Ricardo Oliveira"
+                    },
+                    "phone": {
+                        "description": "Telefone comercial (apenas números)",
+                        "type": "string",
+                        "example": "7133445566"
+                    },
+                    "state_registration": {
+                        "description": "Inscrição Estadual",
+                        "type": "string",
+                        "example": "123456789"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "contato@dismedsalvador.com.br"
+                    },
+                    "isActive": {
+                        "type": "boolean",
+                        "example": true
                     }
                 },
                 "type": "object"
@@ -582,8 +1140,9 @@
                 "description": "Modelo de usuário para autenticação",
                 "properties": {
                     "id": {
-                        "type": "integer",
-                        "example": 1
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "7c9e1234-5678-90ab-cdef-1234567890ab"
                     },
                     "name": {
                         "type": "string",
@@ -616,6 +1175,10 @@
         {
             "name": "Painel",
             "description": "Painel"
+        },
+        {
+            "name": "Funcionários",
+            "description": "Funcionários"
         },
         {
             "name": "Products",

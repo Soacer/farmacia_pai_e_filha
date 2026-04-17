@@ -18,7 +18,18 @@ use OpenApi\Attributes as OA;
 
 class ProductController extends Controller
 {
-
+    #[OA\Get(
+        path: '/product/{id}',
+        summary: 'Exibe os detalhes de um produto específico',
+        tags: ['Products'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Retorna a view de detalhes do produto'),
+            new OA\Response(response: 404, description: 'Produto não encontrado')
+        ]
+    )]
     public function showProductById($id)
     {
 
@@ -29,16 +40,50 @@ class ProductController extends Controller
         return view('product.show_product', compact('product', 'categories', 'suppliers'));
     }
 
-    public function showAllProducts()
+    #[OA\Get(
+        path: '/product/all-products',
+        summary: 'Lista todos os produtos com paginação e ordenação',
+        tags: ['Products'],
+        parameters: [
+            new OA\Parameter(name: 'per_page', in: 'query', description: 'Quantidade de itens (10, 15, 20, 25, 30)', required: false, schema: new OA\Schema(type: 'integer', default: 10)),
+            new OA\Parameter(name: 'page', in: 'query', description: 'Número da página', required: false, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Retorna a view do estoque de produtos')
+        ]
+    )]
+    public function showAllProducts(Request $request)
     {
-        $products = Product::with(['category', 'batch'])->get();
-        // Adicione estas duas linhas:
+        $perPage = $request->get('per_page', 10);
+        if (! in_array($perPage, [10, 15, 20, 25, 30])) {
+            $perPage = 10;
+        }
+
+        $products = Product::query()
+            ->join('categories', 'products.idCategory', '=', 'categories.id')
+            ->select('products.*') // Importante para não sobrescrever o ID do produto com o da categoria
+            ->with(['category', 'batch'])
+            ->orderBy('categories.class', 'asc')     // 1º Ordem Alfabética da Categoria
+            ->orderBy('categories.subclass', 'asc')  // 2º Ordem Alfabética da Subcategoria
+            ->orderBy('products.name', 'asc')        // 3º Ordem Alfabética do Nome
+            ->paginate($perPage);
+
+        $products->appends(['per_page' => $perPage]);
+
         $categories = Category::where('isActive', true)->get();
         $suppliers = Supplier::where('isActive', true)->get();
 
-        return view('product.product_stock', compact('products', 'categories', 'suppliers'));
+        return view('product.product_stock', compact('products', 'categories', 'suppliers', 'perPage'));
     }
 
+    #[OA\Get(
+        path: '/product/create',
+        summary: 'Exibe o formulário de cadastro de novo produto',
+        tags: ['Products'],
+        responses: [
+            new OA\Response(response: 200, description: 'Retorna a view de criação')
+        ]
+    )]
     public function showCreateProductForm()
     {
         $categories = Category::where('isActive', true)->get();
@@ -192,24 +237,28 @@ class ProductController extends Controller
         summary: 'Atualiza produto e lote simultaneamente',
         tags: ['Products'],
         parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
-            content: new OA\JsonContent(
-                properties: [
-                    new OA\Property(property: 'name', type: 'string'),
-                    new OA\Property(property: 'idCategory', type: 'integer'),
-                    new OA\Property(property: 'barcode', type: 'string'),
-                    new OA\Property(property: 'active_principle', type: 'string'),
-                    new OA\Property(property: 'price', type: 'string'),
-                    new OA\Property(property: 'batch_code', type: 'string'),
-                    new OA\Property(property: 'quantity_now', type: 'integer'),
-                    new OA\Property(property: 'idSupplier', type: 'integer'),
-                ]
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'name', type: 'string'),
+                        new OA\Property(property: 'idCategory', type: 'integer'),
+                        new OA\Property(property: 'price', type: 'string'),
+                        new OA\Property(property: 'image_product', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'quantity_now', type: 'integer'),
+                        new OA\Property(property: 'idBatch', type: 'string', format: 'uuid')
+                    ]
+                )
             )
         ),
-        responses: [new OA\Response(response: 200, description: 'Sucesso')]
+        responses: [
+            new OA\Response(response: 200, description: 'Produto atualizado com sucesso'),
+            new OA\Response(response: 404, description: 'Produto não encontrado')
+        ]
     )]
     public function updateProduct(Request $request, $id)
     {
@@ -224,7 +273,7 @@ class ProductController extends Controller
                 'description' => $request->description,
                 'requires_prescription' => $request->has('requires_prescription'),
             ];
-            
+
             if ($request->hasFile('image_product')) {
                 if ($product->image_path && Storage::disk('public')->exists($product->image_path)) {
                     Storage::disk('public')->delete($product->image_path);
@@ -280,30 +329,13 @@ class ProductController extends Controller
     #[OA\Patch(
         path: '/product/deactivate/{id}',
         summary: 'Inativa ou reativa um produto (Soft Delete)',
-        description: 'Alterna o status do atributo isActive. Se o produto estiver ativo (true), ele passará a ser inativo (false) e vice-versa.',
         tags: ['Products'],
         parameters: [
-            new OA\Parameter(
-                name: 'id',
-                in: 'path',
-                description: 'ID numérico do produto a ter o status alterado',
-                required: true,
-                schema: new OA\Schema(type: 'integer', example: 2)
-            ),
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
-            new OA\Response(
-                response: 200,
-                description: 'Status do produto alterado com sucesso'
-            ),
-            new OA\Response(
-                response: 404,
-                description: 'Produto não encontrado'
-            ),
-            new OA\Response(
-                response: 500,
-                description: 'Erro interno ao processar a alteração'
-            ),
+            new OA\Response(response: 200, description: 'Status alterado com sucesso'),
+            new OA\Response(response: 404, description: 'Produto não encontrado')
         ]
     )]
     public function deactivateProduct($id)

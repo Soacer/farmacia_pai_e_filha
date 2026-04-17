@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -27,12 +28,13 @@ class DatabaseSeeder extends Seeder
     private function createAdminUser(): void
     {
         try {
-            $adminRole = Role::where('name', 'admin')->first() ?? Role::where('id', 1)->first();
+            $adminRole = Role::where('roles', 'admin')->first() ?? Role::where('id', 1)->first();
 
             if ($adminRole) {
                 User::firstOrCreate(
                     ['email' => env('ADMIN_EMAIL', 'admin@admin.com')],
                     [
+                        'id' => (string) Str::uuid(),
                         'name'     => env('ADMIN_NAME', 'Administrador'),
                         'idRoles'  => $adminRole->id, // Usa o ID (Inteiro) da tabela roles
                         'password' => Hash::make(env('ADMIN_PASSWORD', 'password')),
