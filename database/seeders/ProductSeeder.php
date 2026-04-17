@@ -76,6 +76,7 @@ class ProductSeeder extends Seeder
                     'quantity' => $quantity,
                     'quantity_now' => $quantity,
                     'cost_price' => $item['price'] * 0.55, // Custo médio de 55% do preço de venda
+                    'isActive' => true,
                 ]);
             }
         }

@@ -2,20 +2,21 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use OpenApi\Attributes as OA;
-use App\Traits\HasUuid;
+
 #[OA\Schema(
     schema: 'Product',
     title: 'Produto',
     description: 'Modelo de representação de um medicamento ou item de conveniência',
     properties: [
-        new OA\Property(property: "id", type: "string", format: "uuid", example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
-        new OA\Property(property: 'idCategory', type: "string", format: "uuid", example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+        new OA\Property(property: 'id', type: 'string', format: 'uuid', example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
+        new OA\Property(property: 'idCategory', type: 'string', format: 'uuid', example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
         new OA\Property(property: 'name', type: 'string', example: 'Paracetamol 500mg'),
         new OA\Property(property: 'description', type: 'string', example: 'Analgésico e antitérmico para dores leves'),
         new OA\Property(property: 'barcode', type: 'string', example: '7891234567890'),
@@ -32,7 +33,9 @@ class Product extends Model
     use HasUuid;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
+
     protected $table = 'products';
 
     protected $fillable = [
@@ -47,6 +50,11 @@ class Product extends Model
         'requires_prescription',
         'image_path',
     ];
+
+    public function activeBatches()
+    {
+        return $this->hasMany(Batch::class, 'idProducts')->where('isActive', true);
+    }
 
     protected function imageUrl()
     {

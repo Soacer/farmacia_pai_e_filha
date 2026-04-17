@@ -75,6 +75,124 @@
                 }
             }
         },
+        "/batches/toggle-status/{id}": {
+            "patch": {
+                "tags": [
+                    "Lotes"
+                ],
+                "summary": "Ativa ou Inativa um lote específico",
+                "operationId": "4e7dcbb0776deb637f3592a01aa5cb03",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status alterado com sucesso"
+                    }
+                }
+            }
+        },
+        "/batches/list": {
+            "get": {
+                "tags": [
+                    "Lotes"
+                ],
+                "summary": "Exibe a listagem visual de todos os lotes",
+                "operationId": "e7cb6a49ad526e82d58a2a2a16d665d6",
+                "responses": {
+                    "200": {
+                        "description": "View carregada com sucesso"
+                    }
+                }
+            }
+        },
+        "/batches/update/{id}": {
+            "put": {
+                "tags": [
+                    "Lotes"
+                ],
+                "summary": "Atualiza os dados de um lote específico",
+                "operationId": "5ff29b9245f1151937b448e06ce0895c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "batch_code": {
+                                        "type": "string"
+                                    },
+                                    "quantity_now": {
+                                        "type": "integer"
+                                    },
+                                    "expiration_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "cost_price": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lote atualizado"
+                    },
+                    "404": {
+                        "description": "Lote não encontrado"
+                    }
+                }
+            }
+        },
+        "/product/{id}/deactivate-batches": {
+            "patch": {
+                "tags": [
+                    "Lotes"
+                ],
+                "summary": "Desativa todos os lotes ativos de um produto",
+                "operationId": "45979e945cde34a1a5a1bedf6ddc889a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do Produto",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lotes desativados com sucesso"
+                    }
+                }
+            }
+        },
         "/employees/{id}": {
             "put": {
                 "tags": [
@@ -268,6 +386,23 @@
                 "responses": {
                     "200": {
                         "description": "Retorna a view com a listagem completa"
+                    }
+                }
+            }
+        },
+        "/product/alerts/stock": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Retorna JSON de produtos com estoque baixo ou zerado",
+                "operationId": "626a4a51bf8ce31f028b260d5e539f7c",
+                "responses": {
+                    "200": {
+                        "description": "Lista de alertas em JSON"
+                    },
+                    "403": {
+                        "description": "Não autorizado"
                     }
                 }
             }
@@ -551,7 +686,7 @@
                 "operationId": "2275dac2803e7245bc51ee05538baef7",
                 "responses": {
                     "200": {
-                        "description": "Visualização carregada"
+                        "description": "Visualização HTML carregada"
                     }
                 }
             }
@@ -562,6 +697,7 @@
                     "Fornecedores"
                 ],
                 "summary": "Lista todos os fornecedores cadastrados",
+                "description": "Retorna a view com a listagem de fornecedores ordenada por nome e com endereços carregados.",
                 "operationId": "c665580028c95d11fca65d7d8ad83f17",
                 "responses": {
                     "200": {
@@ -576,10 +712,87 @@
                     "Fornecedores"
                 ],
                 "summary": "Cadastra um fornecedor e seu endereço",
+                "description": "Cria o registro do fornecedor e o endereço vinculado em uma transação única.",
                 "operationId": "b56476ae9df3f4d3581ed612fb4051a5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cnpj",
+                                    "company_name",
+                                    "phone",
+                                    "zip_code",
+                                    "street",
+                                    "number"
+                                ],
+                                "properties": {
+                                    "cnpj": {
+                                        "type": "string",
+                                        "example": "12.345.678/0001-99"
+                                    },
+                                    "company_name": {
+                                        "type": "string",
+                                        "example": "Distribuidora Exemplo LTDA"
+                                    },
+                                    "trade_name": {
+                                        "type": "string",
+                                        "example": "Farma Distribuidora"
+                                    },
+                                    "contact_name": {
+                                        "type": "string",
+                                        "example": "Carlos Silva"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "71988887777"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "vendas@exemplo.com"
+                                    },
+                                    "state_registration": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "zip_code": {
+                                        "type": "string",
+                                        "example": "41000-000"
+                                    },
+                                    "street": {
+                                        "type": "string",
+                                        "example": "Avenida Sete de Setembro"
+                                    },
+                                    "number": {
+                                        "type": "string",
+                                        "example": "100"
+                                    },
+                                    "neighborhood": {
+                                        "type": "string",
+                                        "example": "Centro"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Salvador"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "example": "BA"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
                         "description": "Fornecedor criado com sucesso"
+                    },
+                    "422": {
+                        "description": "Erro de validação nos dados enviados"
                     }
                 }
             }
@@ -595,15 +808,49 @@
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID (UUID) do fornecedor",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "company_name": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "idAddress": {
+                                        "description": "ID do endereço para atualização",
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "street": {
+                                        "type": "string"
+                                    },
+                                    "city": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Dados atualizados com sucesso"
+                    },
+                    "404": {
+                        "description": "Fornecedor não encontrado"
                     }
                 }
             }
@@ -614,20 +861,26 @@
                     "Fornecedores"
                 ],
                 "summary": "Inativa ou reativa um fornecedor (Soft Delete)",
+                "description": "Alterna o status isActive do fornecedor entre ativo e inativo.",
                 "operationId": "3b1be5a8587f7c995ed13e2f6204adc8",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID (UUID) do fornecedor",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Status alterado com sucesso"
+                    },
+                    "404": {
+                        "description": "Fornecedor não encontrado"
                     }
                 }
             }
@@ -1175,6 +1428,10 @@
         {
             "name": "Painel",
             "description": "Painel"
+        },
+        {
+            "name": "Lotes",
+            "description": "Lotes"
         },
         {
             "name": "Funcionários",

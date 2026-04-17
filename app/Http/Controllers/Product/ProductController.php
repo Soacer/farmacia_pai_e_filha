@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -19,15 +20,55 @@ use OpenApi\Attributes as OA;
 class ProductController extends Controller
 {
     #[OA\Get(
+        path: '/product/alerts/stock',
+        summary: 'Retorna JSON de produtos com estoque baixo ou zerado',
+        tags: ['Products'],
+        responses: [
+            new OA\Response(response: 200, description: 'Lista de alertas em JSON'),
+            new OA\Response(response: 403, description: 'Não autorizado'),
+        ]
+    )]
+    public function getAlertsJson()
+    {
+        if (! Auth::check() || ! in_array(Auth::user()->idRoles, [1, 2])) {
+            return response()->json(['error' => 'Acesso negado'], 403);
+        }
+
+        $alertProducts = Product::with(['activeBatches', 'category'])
+            ->where('isActive', true) // Produto tem que estar ativo
+            ->get()
+            ->map(function ($product) {
+                $saldo = $product->activeBatches->sum('quantity_now');
+
+                if ($saldo <= $product->min_stock_alert) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'category' => $product->category->class ?? 'N/A',
+                        'subclass' => $product->category->subclass ?? 'N/A',
+                        'saldo' => (int) $saldo,
+                        'min' => $product->min_stock_alert,
+                    ];
+                }
+
+                return null;
+            })
+            ->filter()
+            ->values();
+
+        return response()->json($alertProducts);
+    }
+
+    #[OA\Get(
         path: '/product/{id}',
         summary: 'Exibe os detalhes de um produto específico',
         tags: ['Products'],
         parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
             new OA\Response(response: 200, description: 'Retorna a view de detalhes do produto'),
-            new OA\Response(response: 404, description: 'Produto não encontrado')
+            new OA\Response(response: 404, description: 'Produto não encontrado'),
         ]
     )]
     public function showProductById($id)
@@ -46,10 +87,10 @@ class ProductController extends Controller
         tags: ['Products'],
         parameters: [
             new OA\Parameter(name: 'per_page', in: 'query', description: 'Quantidade de itens (10, 15, 20, 25, 30)', required: false, schema: new OA\Schema(type: 'integer', default: 10)),
-            new OA\Parameter(name: 'page', in: 'query', description: 'Número da página', required: false, schema: new OA\Schema(type: 'integer'))
+            new OA\Parameter(name: 'page', in: 'query', description: 'Número da página', required: false, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Retorna a view do estoque de produtos')
+            new OA\Response(response: 200, description: 'Retorna a view do estoque de produtos'),
         ]
     )]
     public function showAllProducts(Request $request)
@@ -81,7 +122,7 @@ class ProductController extends Controller
         summary: 'Exibe o formulário de cadastro de novo produto',
         tags: ['Products'],
         responses: [
-            new OA\Response(response: 200, description: 'Retorna a view de criação')
+            new OA\Response(response: 200, description: 'Retorna a view de criação'),
         ]
     )]
     public function showCreateProductForm()
@@ -250,14 +291,14 @@ class ProductController extends Controller
                         new OA\Property(property: 'price', type: 'string'),
                         new OA\Property(property: 'image_product', type: 'string', format: 'binary'),
                         new OA\Property(property: 'quantity_now', type: 'integer'),
-                        new OA\Property(property: 'idBatch', type: 'string', format: 'uuid')
+                        new OA\Property(property: 'idBatch', type: 'string', format: 'uuid'),
                     ]
                 )
             )
         ),
         responses: [
             new OA\Response(response: 200, description: 'Produto atualizado com sucesso'),
-            new OA\Response(response: 404, description: 'Produto não encontrado')
+            new OA\Response(response: 404, description: 'Produto não encontrado'),
         ]
     )]
     public function updateProduct(Request $request, $id)
@@ -335,7 +376,7 @@ class ProductController extends Controller
         ],
         responses: [
             new OA\Response(response: 200, description: 'Status alterado com sucesso'),
-            new OA\Response(response: 404, description: 'Produto não encontrado')
+            new OA\Response(response: 404, description: 'Produto não encontrado'),
         ]
     )]
     public function deactivateProduct($id)

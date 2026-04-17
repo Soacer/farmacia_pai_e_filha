@@ -10,3 +10,4 @@ Route::prefix('/login')->group(base_path('routes/loginRoutes.php'));
 Route::prefix('/product')->group(base_path('routes/productRoutes.php'));
 Route::prefix('/supplier')->group(base_path('routes/supplierRoute.php'));
 Route::prefix('/employee')->group(base_path('routes/employeeRoutes.php'));
+Route::prefix('/batch')->group(base_path('routes/batchRoutes.php'));

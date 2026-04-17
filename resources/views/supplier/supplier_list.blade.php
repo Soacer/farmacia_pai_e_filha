@@ -40,9 +40,10 @@
                     <tbody class="divide-y divide-slate-100">
                         @foreach ($suppliers as $supplier)
                             @php $address = $supplier->addresses->first(); @endphp
+                            {{-- AJUSTE: Aspas no ID do fornecedor --}}
                             <tr x-show="mostrarInativos || {{ $supplier->isActive ? 'true' : 'false' }}" 
                                 class="hover:bg-slate-50/50 transition duration-150"
-                                :class="editId === {{ $supplier->id }} ? 'bg-blue-50/50' : (!{{ $supplier->isActive ? 'true' : 'false' }} ? 'opacity-60 grayscale-[0.5] bg-slate-50' : '')">
+                                :class="editId === '{{ $supplier->id }}' ? 'bg-blue-50/50' : (!{{ $supplier->isActive ? 'true' : 'false' }} ? 'opacity-60 grayscale-[0.5] bg-slate-50' : '')">
                                 
                                 <td class="px-6 py-4 text-center">
                                     <span class="w-2.5 h-2.5 rounded-full {{ $supplier->isActive ? 'bg-green-500 shadow-sm shadow-green-200' : 'bg-slate-300' }} inline-block"></span>
@@ -65,7 +66,8 @@
 
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end space-x-2">
-                                        <button @click="editId = (editId === {{ $supplier->id }} ? null : {{ $supplier->id }})" 
+                                        {{-- AJUSTE: Aspas no ID no @click --}}
+                                        <button @click="editId = (editId === '{{ $supplier->id }}' ? null : '{{ $supplier->id }}')" 
                                             class="text-slate-400 hover:text-blue-600 transition" title="Editar">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
@@ -81,7 +83,8 @@
                                 </td>
                             </tr>
 
-                            <tr x-show="editId === {{ $supplier->id }}" x-transition class="bg-blue-50/40">
+                            {{-- AJUSTE: Aspas no x-show e adição de x-cloak --}}
+                            <tr x-show="editId === '{{ $supplier->id }}'" x-transition class="bg-blue-50/40" x-cloak>
                                 <td colspan="5" class="p-6 border-l-4 border-blue-500 shadow-inner">
                                     <form action="{{ route('update_supplier', $supplier->id) }}" method="POST" class="space-y-6">
                                         @csrf
@@ -90,11 +93,11 @@
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Razão Social</label>
-                                                <input type="text" name="company_name" value="{{ $supplier->company_name }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white">
+                                                <input type="text" name="company_name" value="{{ $supplier->company_name }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none focus:ring-1 focus:ring-blue-500">
                                             </div>
                                             <div>
                                                 <label class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Nome Fantasia</label>
-                                                <input type="text" name="trade_name" value="{{ $supplier->trade_name }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white">
+                                                <input type="text" name="trade_name" value="{{ $supplier->trade_name }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none focus:ring-1 focus:ring-blue-500">
                                             </div>
                                         </div>
 
@@ -105,22 +108,22 @@
                                             </div>
                                             <div>
                                                 <label class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Inscrição Estadual</label>
-                                                <input type="text" name="state_registration" value="{{ $supplier->state_registration }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white">
+                                                <input type="text" name="state_registration" value="{{ $supplier->state_registration }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none focus:ring-1 focus:ring-blue-500">
                                             </div>
                                         </div>
 
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-blue-100 pt-4">
                                             <div>
                                                 <label class="block text-[10px] font-bold text-blue-700 uppercase mb-1">E-mail</label>
-                                                <input type="email" name="email" value="{{ $supplier->email }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white">
+                                                <input type="email" name="email" value="{{ $supplier->email }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none focus:ring-1 focus:ring-blue-500">
                                             </div>
                                             <div>
                                                 <label class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Telefone</label>
-                                                <input type="text" name="phone" value="{{ $supplier->phone }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white">
+                                                <input type="text" name="phone" value="{{ $supplier->phone }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none focus:ring-1 focus:ring-blue-500">
                                             </div>
                                             <div>
                                                 <label class="block text-[10px] font-bold text-blue-700 uppercase mb-1">Pessoa de Contato</label>
-                                                <input type="text" name="contact_name" value="{{ $supplier->contact_name }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white">
+                                                <input type="text" name="contact_name" value="{{ $supplier->contact_name }}" class="w-full px-3 py-2 rounded border border-blue-200 text-sm bg-white outline-none focus:ring-1 focus:ring-blue-500">
                                             </div>
                                         </div>
 
@@ -130,34 +133,34 @@
                                             <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
                                                 <div class="md:col-span-1">
                                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">CEP</label>
-                                                    <input type="text" name="zip_code" value="{{ $address->zip_code }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white">
+                                                    <input type="text" name="zip_code" value="{{ $address->zip_code }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white outline-none">
                                                 </div>
                                                 <div class="md:col-span-4">
                                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Rua / Logradouro</label>
-                                                    <input type="text" name="street" value="{{ $address->street }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white">
+                                                    <input type="text" name="street" value="{{ $address->street }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white outline-none">
                                                 </div>
                                                 <div class="md:col-span-1">
                                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nº</label>
-                                                    <input type="text" name="number" value="{{ $address->number }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white">
+                                                    <input type="text" name="number" value="{{ $address->number }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white outline-none">
                                                 </div>
                                             </div>
                                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                 <div>
                                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Complemento</label>
-                                                    <input type="text" name="complement" value="{{ $address->complement }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white">
+                                                    <input type="text" name="complement" value="{{ $address->complement }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white outline-none">
                                                 </div>
                                                 <div>
                                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Bairro</label>
-                                                    <input type="text" name="neighborhood" value="{{ $address->neighborhood }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white">
+                                                    <input type="text" name="neighborhood" value="{{ $address->neighborhood }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white outline-none">
                                                 </div>
                                                 <div class="grid grid-cols-3 gap-2">
                                                     <div class="col-span-2">
                                                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cidade</label>
-                                                        <input type="text" name="city" value="{{ $address->city }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white">
+                                                        <input type="text" name="city" value="{{ $address->city }}" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white outline-none">
                                                     </div>
                                                     <div class="col-span-1">
                                                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">UF</label>
-                                                        <input type="text" name="state" value="{{ $address->state }}" maxlength="2" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white text-center font-bold">
+                                                        <input type="text" name="state" value="{{ $address->state }}" maxlength="2" class="w-full px-3 py-2 rounded border border-slate-200 text-sm bg-white text-center font-bold outline-none">
                                                     </div>
                                                 </div>
                                             </div>

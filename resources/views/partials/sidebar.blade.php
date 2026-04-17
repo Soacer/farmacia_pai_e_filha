@@ -19,11 +19,32 @@
             <span class="font-medium">Controle de Estoque</span>
         </a>
 
-        <a href="{{ route('list_suppliers') }}"
-            class="flex items-center gap-3 px-4 py-3 {{ Request::is('suppliers/list') ? 'bg-blue-700' : 'hover:bg-blue-800' }} rounded-lg transition-colors border border-blue-800/50">
-            <i class="fa-solid fa-address-book text-blue-300"></i>
-            <span class="font-medium">Lista de Fornecedores</span>
-        </a>
+        <details class="group" {{ Request::is('suppliers/list*') || Request::is('batches*') ? 'open' : '' }}>
+            <summary
+                class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-blue-800 cursor-pointer list-none transition-colors border border-blue-800/50">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-list-ul text-blue-400"></i>
+                    <span class="font-medium">Listas</span>
+                </div>
+                <i
+                    class="fa-solid fa-chevron-down text-[10px] transition-transform group-open:rotate-180 text-blue-400"></i>
+            </summary>
+
+            <ul class="mt-2 ml-4 pl-4 border-l-2 border-blue-700 space-y-1">
+                <li>
+                    <a href="{{ route('list_suppliers') }}"
+                        class="block px-4 py-2 text-sm {{ Request::is('suppliers/list') ? 'text-white bg-blue-800/50' : 'text-blue-200 hover:text-white hover:bg-blue-800' }} rounded-lg transition font-medium">
+                        Fornecedores
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('batches.list') }}"
+                        class="block px-4 py-2 text-sm text-blue-200 hover:text-white hover:bg-blue-800 rounded-lg transition font-medium">
+                        Lotes
+                    </a>
+                </li>
+            </ul>
+        </details>
 
         <hr class="border-blue-800 my-4 mx-2">
 
@@ -39,7 +60,6 @@
             </summary>
 
             <ul class="mt-2 ml-4 pl-4 border-l-2 border-blue-700 space-y-1">
-                {{-- Apenas Admin (ID 1) vê Funcionários --}}
                 @if (auth()->user()->idRoles == 1)
                     <li>
                         <a href="{{ route('create_employee') }}"

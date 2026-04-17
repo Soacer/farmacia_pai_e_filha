@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\Product;
 #[OA\Tag(name: 'Autenticação', description: 'Endpoints de acesso')]
 class LoginController extends Controller
 {
@@ -34,7 +34,19 @@ class LoginController extends Controller
         ]
     )]
     public function showDashboard(){
-        return view('dashboard');
+        $alertProducts = collect();
+
+        if (Auth::check() && in_array(Auth::user()->idRoles, [1, 2])) {
+            $alertProducts = Product::with(['batch', 'category'])
+                ->where('isActive', true)
+                ->get()
+                ->filter(function($product) {
+                    $saldo = $product->batch->sum('quantity_now');
+                    return $saldo <= $product->min_stock_alert;
+                });
+        }
+
+        return view('dashboard', compact('alertProducts'));
     }
 
     #[OA\Post(
