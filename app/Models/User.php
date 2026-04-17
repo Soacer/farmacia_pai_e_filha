@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
 use OpenApi\Attributes as OA;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
 #[OA\Schema(
     schema: "User",
     title: "Usuário",
     description: "Modelo de usuário para autenticação",
     properties: [
-        new OA\Property(property: "id", type: "integer", example: 1),
+        new OA\Property(property: "id", type: "string", format: "uuid", example: "7c9e1234-5678-90ab-cdef-1234567890ab"),
         new OA\Property(property: "name", type: "string", example: "Administrador"),
         new OA\Property(property: "email", type: "string", format: "email", example: "admin@admin.com"),
         new OA\Property(property: "idRoles", type: "integer", description: "ID do cargo", example: 1),
@@ -22,8 +22,10 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasUuid, HasFactory, Notifiable;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $primaryKey = 'id';
 
     /**
@@ -59,5 +61,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'isActive' => 'boolean',
         ];
+    }
+    public function employee()
+    {
+        return $this->hasOne(Employee::class, 'idUsers');
     }
 }

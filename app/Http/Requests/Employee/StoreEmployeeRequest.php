@@ -8,6 +8,20 @@ class StoreEmployeeRequest extends FormRequest
 {
     public function authorize(): bool { return true; }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'cpf'    => preg_replace('/[^0-9]/', '', $this->cpf),
+            'phone'  => preg_replace('/[^0-9]/', '', $this->phone),
+            'pis'    => preg_replace('/[^0-9]/', '', $this->pis),
+            'ctps'   => preg_replace('/[^0-9]/', '', $this->ctps),
+            'rg'     => preg_replace('/[^0-9]/', '', $this->rg),
+            'zip_code' => preg_replace('/[^0-9]/', '', $this->zip_code),
+            // Limpa o salário para o formato decimal (ex: 1.500,00 -> 1500.00)
+            'salary' => $this->salary ? str_replace(['.', ','], ['', '.'], $this->salary) : null,
+        ]);
+    }
+    
     public function rules(): array
     {
         return [
@@ -21,8 +35,9 @@ class StoreEmployeeRequest extends FormRequest
             'birth_date' => 'required|date',
             'salary' => 'nullable|string', // Trataremos a vírgula no Controller
             'hire_date' => 'nullable|date',
-            'pis' => 'nullable|string|max:11',
-            'job_title' => 'required|string|max:100',
+            'pis' => 'nullable|string',
+            'idOccupation' => 'required|exists:occupations,id',
+            'gender' => 'required|in:M,F,Outro',
             // Address
             'zip_code' => 'required|string',
             'street' => 'required|string',

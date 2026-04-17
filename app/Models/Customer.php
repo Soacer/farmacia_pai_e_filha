@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OpenApi\Attributes as OA;
-
+use App\Traits\HasUuid;
 #[OA\Schema(
     schema: 'Customer',
     title: 'Cliente/Funcionário',
     description: 'Estrutura de dados para cadastro de pessoas',
     properties: [
-        new OA\Property(property: 'idCustomers', type: 'integer', example: 1),
+        new OA\Property(property: "id", type: "string", format: "uuid", example: "7c9e1234-5678-90ab-cdef-1234567890ab"),
         new OA\Property(property: 'name', type: 'string', example: 'Maria Souza'),
         new OA\Property(property: 'cpf', type: 'string', example: '000.000.000-00'),
         new OA\Property(property: 'phone', type: 'string', example: '71999998888'),
@@ -23,14 +23,15 @@ use OpenApi\Attributes as OA;
 class Customer extends Model
 {
     use HasFactory;
+    use HasUuid;
 
-    // Define o nome da tabela conforme a imagem
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $table = 'customers';
 
-    // Como sua chave primária é 'idCustomers', precisamos avisar o Laravel
     protected $primaryKey = 'id';
 
-    // Campos que podem ser preenchidos em massa (Mass Assignment)
     protected $fillable = [
         'name',
         'cpf',

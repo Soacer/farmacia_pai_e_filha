@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('permissions_has_roles', function (Blueprint $table) {
-            $table->uuid('id')->primary();            
-            $table->integer('idpermission');
-            $table->integer('idrole');
-            $table->timestamps();
+        Schema::table('products', function (Blueprint $table) {
+            $table->string('image_path')->nullable()->after('active_principle');
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('permissions_has_roles');
+        Schema::table('products', function (Blueprint $table) {
+            //
+        });
     }
 };

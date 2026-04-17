@@ -12,11 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();            
 
             // Forma moderna e mais segura de referenciar chaves estrangeiras:
-            $table->foreignId('idUsers')->constrained('users')->onDelete('cascade');
-            $table->foreignId('idOccupations')->constrained('occupations'); // O Laravel entende que idOccupation aponta para occupations.id
+            $table->foreignUuid('idUsers')
+                ->constrained('users')
+                ->onDelete('cascade');
+            $table->foreignUuid('idOccupations')
+                ->constrained('occupations'); 
 
             $table->string('cpf', 11)->unique();
             $table->string('rg', 15)->nullable();

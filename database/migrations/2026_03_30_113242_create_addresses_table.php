@@ -12,24 +12,30 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('addresses', function (Blueprint $table) {
-        $table->id();
+            $table->uuid('id')->primary();            
 
-        // 1:N - Um cliente pode aparecer em várias linhas desta tabela
-        $table->foreignId('idCustomer')->nullable()->constrained('customers')->onDelete('cascade');
-        $table->foreignId('idSupplier')->nullable()->constrained('suppliers')->onDelete('cascade');
-
-        // 1:1 - O 'unique()' garante que um idEmployee só apareça uma vez na tabela toda
-        $table->foreignId('idEmployee')->unique()->nullable()->constrained('employees')->onDelete('cascade');
-
-        $table->string('zip_code', 8);
-        $table->string('street');
-        $table->string('number', 10);
-        $table->string('complement')->nullable();
-        $table->string('neighborhood');
-        $table->string('city')->default('Salvador');
-        $table->char('state', 2)->default('BA');
-        $table->timestamps();
-    });
+            $table->foreignUuid('idCustomer')
+                ->nullable()
+                ->constrained('customers')
+                ->onDelete('cascade');
+            $table->foreignUuid('idSupplier')
+                ->nullable()
+                ->constrained('suppliers')
+                ->onDelete('cascade');
+            $table->foreignUuid('idEmployee')
+                ->unique()
+                ->nullable()
+                ->constrained('employees')
+                ->onDelete('cascade');
+            $table->string('zip_code', 8);
+            $table->string('street');
+            $table->string('number', 10);
+            $table->string('complement')->nullable();
+            $table->string('neighborhood');
+            $table->string('city')->default('Salvador');
+            $table->char('state', 2)->default('BA');
+            $table->timestamps();
+        });
     }
 
     /**

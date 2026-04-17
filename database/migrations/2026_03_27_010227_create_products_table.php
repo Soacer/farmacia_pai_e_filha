@@ -12,9 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();            
             
-            $table->unsignedBigInteger('idCategory');
+            $table->foreignUuid('idCategory')
+                ->references('id')
+                ->on('categories')
+                ->onDelete('cascade');
             
             $table->string('name', 255);
             $table->longText('description')->nullable();
@@ -27,11 +30,6 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             
             $table->integer('min_stock_alert')->default(5);
-            
-            $table->foreign('idCategory')
-                  ->references('id')
-                  ->on('categories')
-                  ->onDelete('cascade');
 
             $table->timestamps(); 
             $table->softDeletes();

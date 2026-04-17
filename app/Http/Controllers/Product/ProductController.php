@@ -10,10 +10,25 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+// Para Manipular Imagens
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 use OpenApi\Attributes as OA;
 
 class ProductController extends Controller
 {
+
+    public function showProductById($id)
+    {
+
+        $product = Product::with(['category', 'batch'])->findOrFail($id);
+        $categories = Category::where('isActive', true)->get();
+        $suppliers = Supplier::where('isActive', true)->get();
+
+        return view('product.show_product', compact('product', 'categories', 'suppliers'));
+    }
+
     public function showAllProducts()
     {
         $products = Product::with(['category', 'batch'])->get();
@@ -76,8 +91,35 @@ class ProductController extends Controller
     )]
     public function createProduct(Request $request)
     {
+        $imagePath = null;
+        if ($request->hasFile('image_product')) {
+            $file = $request->file('image_product');
+
+            // Inicia o gerenciador de imagens
+            $manager = new ImageManager(new Driver);
+
+            // Lê a imagem do upload
+            $image = $manager->read($file->getRealPath());
+
+            // Redimensiona e corta para preencher 800x800 (sem distorcer)
+            // Se a imagem for retangular, ele corta as sobras.
+            $image->cover(800, 800);
+
+            // Converte para WebP com 80% de qualidade
+            $encoded = $image->toWebp(80);
+
+            // Define o nome sempre com extensão .webp
+            $filename = hexdec(uniqid()).'.webp';
+            $path = 'products/'.$filename;
+
+            // Salva
+            Storage::disk('public')->put($path, $encoded->toString());
+
+            $imagePath = $path;
+
+        }
         try {
-            return DB::transaction(function () use ($request) {
+            return DB::transaction(function () use ($request, $imagePath) {
                 $supplierId = $request->idSupplier;
 
                 if ($request->novoFornecedor && $request->filled('cnpj')) {
@@ -117,6 +159,7 @@ class ProductController extends Controller
                         'requires_prescription' => $request->requires_prescription ?? false,
                         'price' => str_replace(',', '.', $request->price),
                         'min_stock_alert' => $request->min_stock_alert,
+                        'image_path' => $imagePath,
                     ]
                 );
 
@@ -181,6 +224,25 @@ class ProductController extends Controller
                 'description' => $request->description,
                 'requires_prescription' => $request->has('requires_prescription'),
             ];
+            
+            if ($request->hasFile('image_product')) {
+                if ($product->image_path && Storage::disk('public')->exists($product->image_path)) {
+                    Storage::disk('public')->delete($product->image_path);
+                }
+
+                $file = $request->file('image_product');
+                $manager = new ImageManager(new Driver);
+                $image = $manager->read($file->getRealPath());
+                $image->cover(800, 800);
+                $encoded = $image->toWebp(80);
+
+                $filename = hexdec(uniqid()).'.webp';
+                $path = 'products/'.$filename;
+
+                Storage::disk('public')->put($path, $encoded->toString());
+
+                $productData['image_path'] = $path;
+            }
 
             if ($request->filled('min_stock_alert')) {
                 $productData['min_stock_alert'] = $request->min_stock_alert;
@@ -227,7 +289,7 @@ class ProductController extends Controller
                 description: 'ID numérico do produto a ter o status alterado',
                 required: true,
                 schema: new OA\Schema(type: 'integer', example: 2)
-            )
+            ),
         ],
         responses: [
             new OA\Response(
@@ -241,7 +303,7 @@ class ProductController extends Controller
             new OA\Response(
                 response: 500,
                 description: 'Erro interno ao processar a alteração'
-            )
+            ),
         ]
     )]
     public function deactivateProduct($id)

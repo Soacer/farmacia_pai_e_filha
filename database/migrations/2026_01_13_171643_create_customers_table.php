@@ -12,17 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('customers', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();            
             $table->string('name');
             $table->string('cpf')->unique()->nullable();
             $table->string('phone')->nullable();
 
             //Chave Estrangeira
-            $table->unsignedBigInteger('idUsers');
-            $table->foreign('idUsers')
-              ->references('id')
-              ->on('users')
-              ->onDelete('cascade');
+            $table->foreignUuid('idUsers')
+            ->constrained('users')  
+            ->onDelete('cascade');
               
             //Time Stamps
             $table->timestamps();

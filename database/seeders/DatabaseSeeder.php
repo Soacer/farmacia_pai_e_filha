@@ -4,41 +4,46 @@ namespace Database\Seeders;
 
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call(RoleSeeder::class);
+
         $this->createAdminUser();
+
         $this->call([
-            CategorySeeder::class,
-            OccupationSeeder::class,
-            UserSeeder::class,
+            CategorySeeder::class,   // Necessário para os Produtos
+            OccupationSeeder::class, // Necessário para os Funcionários/Users
+            UserSeeder::class,       // Outros usuários de teste
+            ProductSeeder::class,    // Os 208 produtos da vitrine
         ]);
     }
 
     private function createAdminUser(): void
     {
+        try {
+            $adminRole = Role::where('name', 'admin')->first() ?? Role::where('id', 1)->first();
 
-        if (Role::where('roles', 'admin')->first()) {
-            User::firstOrCreate(
-                ['email' => env('ADMIN_EMAIL')], // 1º Array: Apenas o que é ÚNICO (Busca)
-                [                                // 2º Array: O que criar se não existir
-                    'name' => env('ADMIN_NAME'),
-                    'idRoles' => Role::where('roles', 'admin')->first()->id,
-                    'password' => Hash::make(env('ADMIN_PASSWORD')),
-                    'isActive' => true,
-                ]
-            );
+            if ($adminRole) {
+                User::firstOrCreate(
+                    ['email' => env('ADMIN_EMAIL', 'admin@admin.com')],
+                    [
+                        'name'     => env('ADMIN_NAME', 'Administrador'),
+                        'idRoles'  => $adminRole->id, // Usa o ID (Inteiro) da tabela roles
+                        'password' => Hash::make(env('ADMIN_PASSWORD', 'password')),
+                        'isActive' => true,
+                    ]
+                );
+            } else {
+                Log::warning('Role de Administrador não encontrada. O usuário admin não foi criado.');
+            }
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar usuário admin no Seeder: ' . $e->getMessage());
         }
     }
 }

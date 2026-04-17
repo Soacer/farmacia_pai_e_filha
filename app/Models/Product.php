@@ -6,15 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use OpenApi\Attributes as OA;
-
+use App\Traits\HasUuid;
 #[OA\Schema(
     schema: 'Product',
     title: 'Produto',
     description: 'Modelo de representação de um medicamento ou item de conveniência',
     properties: [
-        new OA\Property(property: 'id', type: 'integer', example: 1),
-        new OA\Property(property: 'idCategory', type: 'integer', example: 5),
+        new OA\Property(property: "id", type: "string", format: "uuid", example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+        new OA\Property(property: 'idCategory', type: "string", format: "uuid", example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
         new OA\Property(property: 'name', type: 'string', example: 'Paracetamol 500mg'),
         new OA\Property(property: 'description', type: 'string', example: 'Analgésico e antitérmico para dores leves'),
         new OA\Property(property: 'barcode', type: 'string', example: '7891234567890'),
@@ -28,7 +29,10 @@ use OpenApi\Attributes as OA;
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
+    use HasUuid;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $table = 'products';
 
     protected $fillable = [
@@ -41,7 +45,17 @@ class Product extends Model
         'min_stock_alert',
         'isActive',
         'requires_prescription',
+        'image_path',
     ];
+
+    protected function imageUrl()
+    {
+        return Attribute::make(
+            get: fn () => $this->image_path
+                ? asset('storage/'.$this->image_path)
+                : asset('images/placeholder-product.png'),
+        );
+    }
 
     /**
      * Casts para garantir que os dados venham nos tipos corretos no PHP

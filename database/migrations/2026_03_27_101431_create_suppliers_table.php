@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('suppliers', function (Blueprint $table) {
-            $table->id(); // Sugiro usar 'id' padrão do Laravel para facilitar relações
+            $table->uuid('id')->primary();            
             $table->string('company_name'); // Razão Social
             $table->string('trade_name')->nullable(); // Nome Fantasia
             $table->string('cnpj', 14)->unique(); // Apenas números

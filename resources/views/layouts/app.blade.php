@@ -53,7 +53,9 @@
            Certifique-se de que o arquivo está em: resources/views/partials/sidebar.blade.php
            Se estiver na raiz de views, use apenas @include('sidebar')
         --}}
-        @include('partials.sidebar')
+        @if (auth()->check())
+            @include('partials.sidebar')
+        @endif
 
         <div class="flex-1 flex flex-col min-w-0">
 

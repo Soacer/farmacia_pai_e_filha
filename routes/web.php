@@ -1,10 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WelcomeController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
 Route::prefix('/user')->group(base_path('routes/userRoutes.php'));
 Route::prefix('/login')->group(base_path('routes/loginRoutes.php'));

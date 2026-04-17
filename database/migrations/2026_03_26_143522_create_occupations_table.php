@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('occupations', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();            
             $table->string('name')->unique(); // Ex: Farmacêutico RT, Balconista
             $table->boolean('requires_crf')->default(false); // Define se o cargo exige conselho
             $table->boolean('isActive')->default(true);

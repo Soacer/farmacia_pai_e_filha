@@ -9,3 +9,14 @@
         {{ session('error') }}
     </div>
 @endif
+
+@if ($errors->any())
+    <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-4 rounded">
+        <p class="font-bold">Ops! Verifique os campos abaixo:</p>
+        <ul class="mt-2 list-disc list-inside text-sm">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif

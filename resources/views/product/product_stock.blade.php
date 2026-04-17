@@ -118,7 +118,7 @@
 
                             <tr x-show="editId === {{ $product->id }}" x-transition class="bg-blue-50/40">
                                 <td colspan="6" class="p-0 border-l-4 border-blue-500">
-                                    <form action="{{ route('update_product', $product->id) }}" method="POST"
+                                    <form action="{{ route('update_product', $product->id) }}" enctype="multipart/form-data" method="POST"
                                         class="p-6 space-y-6">
                                         @csrf
                                         @method('PUT')
@@ -182,6 +182,14 @@
                                                 Comercial / Detalhes</label>
                                             <textarea name="description" rows="2"
                                                 class="w-full px-3 py-2 rounded border border-blue-200 text-sm outline-none resize-none focus:border-blue-500 bg-white shadow-sm">{{ $product->description }}</textarea>
+                                        </div>
+                                        <div class="mt-4">
+                                            <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Alterar Foto
+                                                do Produto</label>
+                                            <input type="file" name="image_product"
+                                                class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                            <p class="text-[10px] text-slate-400 mt-1 italic">*Deixe em branco para manter
+                                                a foto atual.</p>
                                         </div>
                                         @if ($loteAtual)
                                             <div class="pt-4 border-t border-blue-100">
